@@ -96,43 +96,14 @@ public class COTVisualizer {
 		List<String> list = new ArrayList<String>();
 
 		try {
-			/*
-			 * //Reading multiple files using BufferedReader FileInputStream
-			 * is1=new FileInputStream(
-			 * "C:\\Users\\name\\workspace\\ReadCoTMultithreaded\\financials");
-			 * FileInputStream is2=new FileInputStream(
-			 * "C:\\Users\\name\\workspace\\ReadCoTMultithreaded\\commodities");
-			 * SequenceInputStream is=new SequenceInputStream(is1, is2);
-			 * BufferedReader reader=new BufferedReader(new
-			 * InputStreamReader(is));
-			 * 
-			 * while((str = reader.readLine()) != null && !str.isEmpty()){
-			 * list.add(str); }
-			 * 
-			 * is1.close(); is2.close();
-			 */
-
-			// ALTERNATIVE: List<String> list =
-			// Files.readAllLines(Paths.get("path/of/text"),
-			// StandardCharsets.UTF_8);
-			BufferedReader in = new BufferedReader(
-					new FileReader("C:\\Users\\name\\workspace\\ReadCoTMultithreaded\\futures"));
-
-			while ((str = in.readLine()) != null) {
-				list.add(str);
-			}
+			BufferedReader in = new BufferedReader(new FileReader("futures"));
+			File fut = new File("futures");
+			if (fut.exists())
+				while ((str = in.readLine()) != null) {
+					list.add(str);
+				}
 
 			in.close();
-
-			/*
-			 * BufferedReader in2 = new BufferedReader(new FileReader(
-			 * "C:\\Users\\name\\workspace\\ReadCoTMultithreaded\\commodities"))
-			 * ;
-			 * 
-			 * while ((str = in2.readLine()) != null){ list.add(str); }
-			 * 
-			 * in.close(); in2.close();
-			 */
 		}
 
 		catch (IOException e) {
@@ -161,7 +132,7 @@ public class COTVisualizer {
 				BufferedReader in;
 
 				try {
-					String selected_path = "C:\\Users\\name\\workspace\\ReadCoTMultithreaded\\Tables\\" + selected;
+					String selected_path = "tables/" + selected;
 					in = new BufferedReader(new FileReader(selected_path));
 					while ((str = in.readLine()) != null) {
 						String[] tokens = str.split("\\s+");
@@ -196,7 +167,10 @@ public class COTVisualizer {
 					int d = commercials[t];
 					int f = commercials[max26];
 					int g = commercials[min26];
-					int o = 100 * (d - g) / (f - g);
+					int o = 0;
+					if ((f - g) != 0)
+						o = 100 * (d - g) / (f - g);
+
 					oszillator26[t] = o;
 					t++;
 				}
@@ -209,23 +183,6 @@ public class COTVisualizer {
 			}
 		});
 
-		/*
-		 * sliderx = new JSlider();
-		 * sliderx.setBorder(BorderFactory.createTitledBorder("X-Achse"));
-		 * sliderx.setMajorTickSpacing(10); sliderx.setMinorTickSpacing(2);
-		 * sliderx.setPaintTicks(true); sliderx.setPaintLabels(true);
-		 * sliderx.setMaximumSize(new Dimension(300,60));
-		 * sliderx.setName("zoomx"); sliderx.addChangeListener(new
-		 * SliderListener());
-		 * 
-		 * slidery = new JSlider();
-		 * slidery.setBorder(BorderFactory.createTitledBorder("Y-Achse"));
-		 * slidery.setMajorTickSpacing(10); slidery.setMinorTickSpacing(2);
-		 * slidery.setPaintTicks(true); slidery.setPaintLabels(true);
-		 * slidery.setMaximumSize(new Dimension(300,60));
-		 * slidery.setName("zoomy"); slidery.addChangeListener(new
-		 * SliderListener());
-		 */
 		grid_box = new JCheckBox();
 		grid_box.setText("Grid");
 		grid_box.addItemListener(new ItemListener() {
@@ -351,15 +308,6 @@ public class COTVisualizer {
 					Cursor cursor = new Cursor(Cursor.DEFAULT_CURSOR);
 					myframe.setCursor(cursor);
 				}
-
-				/*
-				 * if((arg0.getX()<=MyRectanglePanel.width-MyRectanglePanel.
-				 * space_right) &&
-				 * (arg0.getY()>=MyRectanglePanel.height-MyRectanglePanel.
-				 * space_buttom) && (arg0.getY()<MyRectanglePanel.height)){
-				 * Cursor cursor = new Cursor(Cursor.W_RESIZE_CURSOR);
-				 * myframe.setCursor(cursor); }
-				 */
 
 				if ((arg0.getX() >= MyRectanglePanel.width - MyRectanglePanel.space_right)
 						&& (arg0.getY() > MyRectanglePanel.height - MyRectanglePanel.space_buttom)) {
