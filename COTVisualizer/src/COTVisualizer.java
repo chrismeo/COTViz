@@ -62,7 +62,7 @@ public class COTVisualizer {
 		myframe.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
 		try {
-			myframe.setIconImage(ImageIO.read(new File("C:\\Users\\name\\workspace\\COTVisualizer\\holly.png")));
+			myframe.setIconImage(ImageIO.read(new File("holly.png")));
 		}
 
 		catch (IOException e) {
