@@ -1,10 +1,12 @@
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
@@ -26,28 +28,36 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 
 public class COTupdater {
-	public static File folder_futures;
-	public static File[] list_of_files;
-	public static File folder_commodity;
-	public static File[] listOfFiles;
-	public static File folder_financial;
-	public static File[] listOfFiles_financials;
-	public static List<String> commodities_allowed;
-	public static List<String> financials_allowed;
-	public static List<String> futures_allowed;
-	public static String folder = "";
-	public static int last_year;
-	public static long timeStart;
-	public static long timeEnd;
+	private File folder_futures;
+	private File[] list_of_files;
+	private List<String> futures_allowed;
+	private String folder = "";
+	private int last_year;
+	private String datehead;
 
-	public static void update() {
+	public void update() {
+		checklastdate();
 		downloadCOT();
 		write_future_files();
 	}
 
-	private static void write_future_files() {
+	private void checklastdate() {
+		File file = new File("head");
+		if (file.exists()) {
+			try {
+				BufferedReader br = new BufferedReader(new FileReader(file));
+				datehead = br.readLine();
+				br.close();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
+	private void write_future_files() {
 		File dir = new File("tables/");
-		dir.mkdir();
+		if (!dir.exists())
+			dir.mkdir();
 		folder = dir.getPath();
 
 		for (int k = 0; k < futures_allowed.size(); k++) {
@@ -56,9 +66,10 @@ public class COTupdater {
 			File f = new File(path);
 
 			try {
-				PrintWriter pw = new PrintWriter(f);
-
-				for (int l = list_of_files.length - 1; l >= 0; l--) {
+				// PrintWriter pw = new PrintWriter(f);
+				FileWriter tablefw = new FileWriter(f, true);
+				for (int l = list_of_files.length
+						- 1; l >= 0; l--) {
 					InputStream fs = new FileInputStream(list_of_files[l]);
 					HSSFWorkbook wb = new HSSFWorkbook(fs);
 					HSSFSheet sheet = wb.getSheetAt(0);
@@ -76,6 +87,10 @@ public class COTupdater {
 							date = cell2.getDateCellValue();
 							DateFormat df = new SimpleDateFormat("MM/yy");
 							String datestring = df.format(date);
+							if ((datehead != null) && (datestring.compareTo(datehead) == 0)) {
+								System.out.println("break");
+								break;
+							}
 							line += datestring;
 							line += " ";
 
@@ -102,7 +117,9 @@ public class COTupdater {
 							int smalltraders = (int) result3;
 							line += String.valueOf(smalltraders);
 
-							pw.println(line);
+							//pw.println(line);
+							tablefw.write(line+"\n");
+							
 						}
 					}
 
@@ -110,12 +127,42 @@ public class COTupdater {
 					fs.close();
 				}
 
-				pw.close();
+				//pw.close();
+				tablefw.close();
 			}
 
 			catch (IOException e) {
 				e.printStackTrace();
 			}
+		}
+
+		// latest date
+		InputStream isdate;
+		try {
+			int n = list_of_files.length;
+			isdate = new FileInputStream(list_of_files[n-1]);
+			HSSFWorkbook wbdate = new HSSFWorkbook(isdate);
+			HSSFSheet sheetdate = wbdate.getSheetAt(0);
+
+			Cell cell2 = sheetdate.getRow(1).getCell(2);
+			Date date = new Date();
+			date = cell2.getDateCellValue();
+			File filedate = new File("head");
+
+			if (filedate.exists()) {
+				filedate.delete();
+				filedate = new File("head");
+			}
+
+			DateFormat df = new SimpleDateFormat("dd/MM/yy");
+			String datestring = df.format(date);
+			BufferedWriter out = new BufferedWriter(new FileWriter(filedate, true));
+			out.write(datestring);
+			out.close();
+		}
+
+		catch (IOException e) {
+			e.printStackTrace();
 		}
 
 		// delete folder unzip/
@@ -128,7 +175,7 @@ public class COTupdater {
 		fileunzip.delete();
 	}
 
-	private static void downloadCOT() {
+	private void downloadCOT() {
 		int year = Calendar.getInstance().get(Calendar.YEAR);
 
 		File dirtables = new File("tables");
@@ -194,7 +241,7 @@ public class COTupdater {
 			write_futurenames_gui();
 	}
 
-	private static void unzipCOT() {
+	private void unzipCOT() {
 		File dir = new File("cot-excel");
 		File[] zipfiles = dir.listFiles();
 		String destDir = "unzip/";
@@ -222,7 +269,7 @@ public class COTupdater {
 		dir.delete();
 	}
 
-	private static void unzip(String zipFilePath, String destDir, String prefix) throws IOException {
+	private void unzip(String zipFilePath, String destDir, String prefix) throws IOException {
 		FileInputStream fis;
 		byte[] buffer = new byte[1024];
 		fis = new FileInputStream(zipFilePath);
@@ -250,7 +297,7 @@ public class COTupdater {
 		fis.close();
 	}
 
-	private static void write_futurenames_gui() {
+	private void write_futurenames_gui() {
 		File test = new File("futures");
 		if (!test.exists()) {
 			try {
@@ -268,7 +315,7 @@ public class COTupdater {
 		}
 	}
 
-	private static void makefutureslist() {
+	private void makefutureslist() {
 		futures_allowed = Stream.of("LEAN HOGS - CHICAGO MERCANTILE EXCHANGE",
 				"FEEDER CATTLE - CHICAGO MERCANTILE EXCHANGE", "LIVE CATTLE - CHICAGO MERCANTILE EXCHANGE",
 				"RANDOM LENGTH LUMBER - CHICAGO MERCANTILE EXCHANGE", "SUGAR NO. 11 - ICE FUTURES U.S.",
