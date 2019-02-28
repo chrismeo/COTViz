@@ -30,7 +30,7 @@ public class COTupdater {
 	private String datehead;
 	private String[] futureslist;
 	private HashMap<String, String> hash = new HashMap<String, String>();
-
+//TEST
 	public COTupdater() {
 		makefutureslist();
 		makehash();
