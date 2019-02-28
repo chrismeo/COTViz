@@ -45,10 +45,10 @@ public class COTVisualizer {
 	public static Integer[] largetraders;
 	public static Integer[] smalltraders;
 	public static Integer[] oszillator26;
-	public static int fadenkreuzx, fadenkreuzy;
-	public static boolean drawfadenkreuz = false;
+	public static int crosshairx, crosshairy;
+	public static boolean drawcrosshair = false;
 	public static boolean grid = false;
-	public static JCheckBox grid_box, fadenkreuz_box, plus, minus;
+	public static JCheckBox grid_box, crosshair_box, plus, minus;
 	public static int drag_x;
 	public static Point mousePT;
 	public static int dx = 0;
@@ -133,9 +133,7 @@ public class COTVisualizer {
 				BufferedReader in;
 
 				try {
-					// if(Files.isDirectory(Paths.get("tables"))) {
-					File tablesFolder = new File("tables");
-                    if(!tablesFolder.exists()) 
+					File tablesFolder = new File("tables"); 
 					if (tablesFolder.isDirectory()) {
 						String selected_path = "tables/" + selected;
 						in = new BufferedReader(new FileReader(selected_path));
@@ -151,7 +149,7 @@ public class COTVisualizer {
 						commercials = commercials_list.toArray(new Integer[commercials_list.size()]);
 						largetraders = largetraders_list.toArray(new Integer[largetraders_list.size()]);
 						smalltraders = smalltraders_list.toArray(new Integer[smalltraders_list.size()]);
-						oszillator26 = new Integer[dates.length - 26];
+						oszillator26 = new Integer[dates.length - 26]; 
 
 						List<Integer> oszillator26_list = new ArrayList<Integer>();
 						int t = 0;
@@ -214,7 +212,7 @@ public class COTVisualizer {
 		});
 
 		grid_box = new JCheckBox();
-		grid_box.setText("Grid");
+		grid_box.setText("grid");
 		grid_box.addItemListener(new ItemListener() {
 			@Override
 			public void itemStateChanged(ItemEvent arg0) {
@@ -227,13 +225,13 @@ public class COTVisualizer {
 			}
 		});
 
-		fadenkreuz_box = new JCheckBox();
-		fadenkreuz_box.setText("Fadenkreuz");
+		crosshair_box = new JCheckBox();
+		crosshair_box.setText("crosshair");
 
-		fadenkreuz_box.addItemListener(new ItemListener() {
+		crosshair_box.addItemListener(new ItemListener() {
 			@Override
 			public void itemStateChanged(ItemEvent arg0) {
-				drawfadenkreuz = !drawfadenkreuz;
+				drawcrosshair = !drawcrosshair;
 				if (!selected.equals("")) {
 					MyRectanglePanel.drawgraph = true;
 					MyOszillator.drawoszillator = true;
@@ -281,7 +279,7 @@ public class COTVisualizer {
 		tb.add(mycombobox);
 		JLabel dummy = new JLabel("                                                                         ");
 		tb.add(grid_box);
-		tb.add(fadenkreuz_box);
+		tb.add(crosshair_box);
 		tb.add(plus);
 		tb.add(minus);
 		tb.add(update);
@@ -345,8 +343,8 @@ public class COTVisualizer {
 					myframe.setCursor(cursor);
 				}
 
-				fadenkreuzx = arg0.getX();
-				fadenkreuzy = arg0.getY();
+				crosshairx = arg0.getX();
+				crosshairy = arg0.getY();
 
 				File tablesFolder = new File("tables");
 			

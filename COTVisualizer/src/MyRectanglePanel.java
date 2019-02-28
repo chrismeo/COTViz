@@ -44,35 +44,35 @@ public class MyRectanglePanel extends JPanel{
 	  g.fillRect(width-space_right+1, 0, width, height);
 	 
 	  
-	  //Fadenkreuz
-      if((COTVisualizer.drawfadenkreuz) && (drawgraph))
+	  //crosshair
+      if((COTVisualizer.drawcrosshair) && (drawgraph))
       {
     	 
          g.setColor(Color.YELLOW);
-         if (COTVisualizer.fadenkreuzx > (width-space_right)){
-        	 COTVisualizer.fadenkreuzx = width-space_right;
+         if (COTVisualizer.crosshairx > (width-space_right)){
+        	 COTVisualizer.crosshairx = width-space_right;
          }
-         g.drawLine(COTVisualizer.fadenkreuzx, 0, COTVisualizer.fadenkreuzx, COTVisualizer.panelpaint.getHeight());
-         g.drawLine(0, COTVisualizer.fadenkreuzy, COTVisualizer.panelpaint.getWidth()-space_right, COTVisualizer.fadenkreuzy);
-         g.fillRect(COTVisualizer.fadenkreuzx-20, COTVisualizer.panelpaint.getHeight()-20, 40, 20);
+         g.drawLine(COTVisualizer.crosshairx, 0, COTVisualizer.crosshairx, COTVisualizer.panelpaint.getHeight());
+         g.drawLine(0, COTVisualizer.crosshairy, COTVisualizer.panelpaint.getWidth()-space_right, COTVisualizer.crosshairy);
+         g.fillRect(COTVisualizer.crosshairx-20, COTVisualizer.panelpaint.getHeight()-20, 40, 20);
          
          
-         g.fillRect(COTVisualizer.panelpaint.getWidth()-space_right+1, COTVisualizer.fadenkreuzy-10, 60, 20);
+         g.fillRect(COTVisualizer.panelpaint.getWidth()-space_right+1, COTVisualizer.crosshairy-10, 60, 20);
          g.setFont(font_small);
          g.setColor(Color.CYAN);
-         int ywert=-(COTVisualizer.fadenkreuzy-height/2)*1000;        
-         g.drawString(String.valueOf(ywert),COTVisualizer.panelpaint.getWidth()-space_right+9 ,COTVisualizer.fadenkreuzy+5 );
+         int ywert=-(COTVisualizer.crosshairy-height/2)*1000;        
+         g.drawString(String.valueOf(ywert),COTVisualizer.panelpaint.getWidth()-space_right+9 ,COTVisualizer.crosshairy+5 );
          
-         int index_datum =(width-COTVisualizer.fadenkreuzx-space_right)/10;
+         int index_datum =(width-COTVisualizer.crosshairx-space_right)/10;
         
          /*String*/ datum = COTVisualizer.dates[index_datum];//"11/11";
          
-         g.drawString(datum, COTVisualizer.fadenkreuzx-15, height-5);
+         g.drawString(datum, COTVisualizer.crosshairx-15, height-5);
          
-         //g.drawString("Datum: ", COTVisualizer.fadenkreuzx, COTVisualizer.fadenkreuzy+10);
-         //g.drawString("Commercials: ", COTVisualizer.fadenkreuzx, COTVisualizer.fadenkreuzy+25);
-         //g.drawString("Large Traders: ", COTVisualizer.fadenkreuzx, COTVisualizer.fadenkreuzy+40);
-         //g.drawString("Small Traders: ", COTVisualizer.fadenkreuzx, COTVisualizer.fadenkreuzy+55);
+         //g.drawString("Datum: ", COTVisualizer.crosshairx, COTVisualizer.crosshairy+10);
+         //g.drawString("Commercials: ", COTVisualizer.crosshairx, COTVisualizer.crosshairy+25);
+         //g.drawString("Large Traders: ", COTVisualizer.crosshairx, COTVisualizer.crosshairy+40);
+         //g.drawString("Small Traders: ", COTVisualizer.crosshairx, COTVisualizer.crosshairy+55);
          
       }
 	  
