@@ -15,12 +15,15 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.StringTokenizer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+
+import javax.naming.directory.DirContext;
 
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -30,10 +33,17 @@ import org.apache.poi.ss.usermodel.Row;
 public class COTupdater {
 	private File folder_futures;
 	private File[] list_of_files;
-	private List<String> futures_allowed;
+	// private List<String> futures_allowed;
 	private String folder = "";
 	private int last_year;
 	private String datehead;
+	private String[] futureslist;
+	private HashMap<String, String> hash = new HashMap<String, String>();
+
+	public COTupdater() {
+		makefutureslist();
+		makehash();
+	}
 
 	public void update() {
 		checklastdate();
@@ -55,41 +65,44 @@ public class COTupdater {
 	}
 
 	private void write_future_files() {
-		File dir = new File("tables/");
+		File dir = new File("tables");
 		if (!dir.exists())
 			dir.mkdir();
 		folder = dir.getPath();
 
-		for (int k = 0; k < futures_allowed.size(); k++) {
-			String name = futures_allowed.get(k);
-			String path = folder + "\\" + name;
-			File f = new File(path);
+		for (int k = 0; k < futureslist.length; k++) {
+			String name = futureslist[k];
+			String path = "";
+			String OS = System.getProperty("os.name");
+			if (OS.startsWith("Windows"))
+				path = folder + "\\" + name;
+			else
+				path = folder + "/" + name;
 
+			File f = new File(path);
 			try {
 				// PrintWriter pw = new PrintWriter(f);
 				FileWriter tablefw = new FileWriter(f, true);
-				for (int l = list_of_files.length
-						- 1; l >= 0; l--) {
+				for (int l = list_of_files.length - 1; l >= 0; l--) {
 					InputStream fs = new FileInputStream(list_of_files[l]);
 					HSSFWorkbook wb = new HSSFWorkbook(fs);
 					HSSFSheet sheet = wb.getSheetAt(0);
-		
+
 					for (Row row : sheet) {
 						Cell cell0 = row.getCell(0);
 						String celltext0 = cell0.getStringCellValue();
 						String line = "";
 
-						if (celltext0.contains(name))// (celltext0.equals(name))
+						if (celltext0.contains(hash.get(name)))// (celltext0.equals(name))
 						{
 							// Datum
 							Cell cell2 = row.getCell(2);
 							Date date = new Date();
 							date = cell2.getDateCellValue();
-							
+
 							DateFormat df = new SimpleDateFormat("MM/yy");
 							String datestring = df.format(date);
 							if ((datehead != null) && (datestring.compareTo(datehead) == 0)) {
-								System.out.println("break");
 								break;
 							}
 							line += datestring;
@@ -118,9 +131,8 @@ public class COTupdater {
 							int smalltraders = (int) result3;
 							line += String.valueOf(smalltraders);
 
-							//pw.println(line);
-							tablefw.write(line+"\n"); System.out.println(line);
-							
+							// pw.println(line);
+							tablefw.write(line + "\n");
 						}
 					}
 
@@ -128,7 +140,7 @@ public class COTupdater {
 					fs.close();
 				}
 
-				//pw.close();
+				// pw.close();
 				tablefw.close();
 			}
 
@@ -141,7 +153,7 @@ public class COTupdater {
 		InputStream isdate;
 		try {
 			int n = list_of_files.length;
-			isdate = new FileInputStream(list_of_files[n-1]);
+			isdate = new FileInputStream(list_of_files[n - 1]);
 			HSSFWorkbook wbdate = new HSSFWorkbook(isdate);
 			HSSFSheet sheetdate = wbdate.getSheetAt(0);
 
@@ -233,13 +245,12 @@ public class COTupdater {
 		}
 
 		unzipCOT();
-		folder_futures = new File("unzip/");
+		folder_futures = new File("unzip");
 		list_of_files = folder_futures.listFiles();
-		File test = new File("futures");
-		makefutureslist();
+		// File test = new File("futures");
+		// makefutureslist();
 
-		if (!test.exists())
-			write_futurenames_gui();
+		// if (!test.exists()) write_futurenames_gui();
 	}
 
 	private void unzipCOT() {
@@ -298,50 +309,129 @@ public class COTupdater {
 		fis.close();
 	}
 
-	private void write_futurenames_gui() {
-		File test = new File("futures");
-		if (!test.exists()) {
-			try {
-				PrintWriter pw = new PrintWriter("futures");
-				for (int i = 0; i < futures_allowed.size(); i++) {
-					pw.println(futures_allowed.get(i));
-				}
+	/*
+	 * private void write_futurenames_gui() { File test = new File("futures"); if
+	 * (!test.exists()) { try { PrintWriter pw = new PrintWriter("futures"); for
+	 * (int i = 0; i < futures_allowed.size(); i++) {
+	 * pw.println(futures_allowed.get(i)); }
+	 * 
+	 * pw.close(); }
+	 * 
+	 * catch (FileNotFoundException e) { e.printStackTrace(); } } }
+	 */
+/*
+	public HashMap<String,String> getFuturesHash() {
+		return hash;
+	}
+	*/
+	public String[] getFuturesList() {
+		return futureslist;
+	}
 
-				pw.close();
-			}
-
-			catch (FileNotFoundException e) {
-				e.printStackTrace();
-			}
-		}
+	private void makehash() {
+		hash.put("LEANHOGS", "LEAN HOGS - CHICAGO MERCANTILE EXCHANGE");
+		hash.put("FEEDERCATTLE", "FEEDER CATTLE - CHICAGO MERCANTILE EXCHANGE");
+		hash.put("LIVECATTLE", "LIVE CATTLE - CHICAGO MERCANTILE EXCHANGE");
+		hash.put("LUMBER", "RANDOM LENGTH LUMBER - CHICAGO MERCANTILE EXCHANGE");
+		hash.put("SUGARNo11", "SUGAR NO. 11 - ICE FUTURES U.S.");
+		hash.put("COFFEE", "COFFEE C - ICE FUTURES U.S.");
+		hash.put("ORANGEJUICE", "FRZN CONCENTRATED ORANGE JUICE - ICE FUTURES U.S.");
+		hash.put("COTTON", "COTTON NO. 2 - ICE FUTURES U.S.");
+		hash.put("COCOA", "COCOA - ICE FUTURES U.S.");
+		hash.put("SOYBEANOIL", "SOYBEAN OIL - CHICAGO BOARD OF TRADE");
+		hash.put("SOYBEANMEAL", "SOYBEAN MEAL - CHICAGO BOARD OF TRADE");
+		hash.put("SOYBEANS", "SOYBEANS - CHICAGO BOARD OF TRADE");
+		hash.put("OATS", "OATS - CHICAGO BOARD OF TRADE");
+		hash.put("RICE", "ROUGH RICE - CHICAGO BOARD OF TRADE");
+		hash.put("WHEAT", "WHEAT-SRW - CHICAGO BOARD OF TRADE");
+		hash.put("CORN", "CORN - CHICAGO BOARD OF TRADE");
+		hash.put("ETHANOL", "CBT ETHANOL - CHICAGO BOARD OF TRADE");
+		hash.put("NATURALGAS", "NATURAL GAS - NEW YORK MERCANTILE EXCHANGE");
+		hash.put("HEATINGOIL", "#2 HEATING OIL");
+		hash.put("GASOLINE", "GASOLINE BLENDSTOCK (RBOB) - NEW YORK MERCANTILE EXCHANGE");
+		hash.put("WTI", "CRUDE OIL, LIGHT SWEET - NEW YORK MERCANTILE EXCHANGE");
+		hash.put("COPPER", "COPPER-GRADE #1 - COMMODITY EXCHANGE INC.");
+		hash.put("PALLADIUM", "PALLADIUM - NEW YORK MERCANTILE EXCHANGE");
+		hash.put("GOLD", "GOLD - COMMODITY EXCHANGE INC.");
+		hash.put("SILVER", "SILVER - COMMODITY EXCHANGE INC.");
+		hash.put("PLATINUM", "PLATINUM - NEW YORK MERCANTILE EXCHANGE");
+		hash.put("S&P", "S&P 500 Consolidated - CHICAGO MERCANTILE EXCHANGE");
+		hash.put("DJIA", "DJIA Consolidated - CHICAGO BOARD OF TRADE");
+		hash.put("NASDAQ", "NASDAQ-100 Consolidated - CHICAGO MERCANTILE EXCHANGE");
+		hash.put("RUSSELL2000MINI", "RUSSELL 2000 MINI INDEX FUTURE - ICE FUTURES U.S.");
+		hash.put("NIKKEI", "NIKKEI STOCK AVERAGE - CHICAGO MERCANTILE EXCHANGE");
+		hash.put("USTREASURYBONDS", "U.S. TREASURY BONDS - CHICAGO BOARD OF TRADE");
+		hash.put("2YEARUSTREASURYNOTES", "2-YEAR U.S. TREASURY NOTES - CHICAGO BOARD OF TRADE");
+		hash.put("5YEARUSTREASURYNOTES", "5-YEAR U.S. TREASURY NOTES - CHICAGO BOARD OF TRADE");
+		hash.put("10YEARUSTREASURYNOTES", "10-YEAR U.S. TREASURY NOTES - CHICAGO BOARD OF TRADE");
+		hash.put("30DAYFEDERALFUNDSs", "30-DAY FEDERAL FUNDS - CHICAGO BOARD OF TRADE");
+		hash.put("AUSTRALIANDOLLAR", "AUSTRALIAN DOLLAR - CHICAGO MERCANTILE EXCHANGE");
+		hash.put("BRAZILIANREAL", "BRAZILIAN REAL - CHICAGO MERCANTILE EXCHANGE");
+		hash.put("BRITISHPOUNDSTERLING", "BRITISH POUND STERLING - CHICAGO MERCANTILE EXCHANGE");
+		hash.put("EUROFX", "EURO FX - CHICAGO MERCANTILE EXCHANGE");
+		hash.put("JAPANESEYEN", "JAPANESE YEN - CHICAGO MERCANTILE EXCHANGE");
+		hash.put("CANADIANDOLLAR", "CANADIAN DOLLAR - CHICAGO MERCANTILE EXCHANGE");
+		hash.put("MEXICANPESO", "MEXICAN PESO - CHICAGO MERCANTILE EXCHANGE");
+		hash.put("NEWZEALANDDOLLAR", "NEW ZEALAND DOLLAR - CHICAGO MERCANTILE EXCHANGE");
+		hash.put("RUSSIANRUBLE", "RUSSIAN RUBLE - CHICAGO MERCANTILE EXCHANGE");
+		hash.put("BITCOIN", "BITCOIN-USD - CBOE FUTURES EXCHANGE");
+		hash.put("SWISSFRANC", "SWISS FRANC - CHICAGO MERCANTILE EXCHANGE");
 	}
 
 	private void makefutureslist() {
-		futures_allowed = Stream.of("LEAN HOGS - CHICAGO MERCANTILE EXCHANGE",
-				"FEEDER CATTLE - CHICAGO MERCANTILE EXCHANGE", "LIVE CATTLE - CHICAGO MERCANTILE EXCHANGE",
-				"RANDOM LENGTH LUMBER - CHICAGO MERCANTILE EXCHANGE", "SUGAR NO. 11 - ICE FUTURES U.S.",
-				"COFFEE C - ICE FUTURES U.S.", "FRZN CONCENTRATED ORANGE JUICE - ICE FUTURES U.S.",
-				"COTTON NO. 2 - ICE FUTURES U.S.", "COCOA - ICE FUTURES U.S.", "SOYBEAN OIL - CHICAGO BOARD OF TRADE",
-				"SOYBEAN MEAL - CHICAGO BOARD OF TRADE", "SOYBEANS - CHICAGO BOARD OF TRADE",
-				"OATS - CHICAGO BOARD OF TRADE", "ROUGH RICE - CHICAGO BOARD OF TRADE",
-				"WHEAT-SRW - CHICAGO BOARD OF TRADE", "CORN - CHICAGO BOARD OF TRADE",
-				"CBT ETHANOL - CHICAGO BOARD OF TRADE", "NATURAL GAS - NEW YORK MERCANTILE EXCHANGE", "#2 HEATING OIL",
-				"GASOLINE BLENDSTOCK (RBOB) - NEW YORK MERCANTILE EXCHANGE",
-				"CRUDE OIL, LIGHT SWEET - NEW YORK MERCANTILE EXCHANGE", "COPPER-GRADE #1 - COMMODITY EXCHANGE INC.",
-				"PALLADIUM - NEW YORK MERCANTILE EXCHANGE", "GOLD - COMMODITY EXCHANGE INC.",
-				"SILVER - COMMODITY EXCHANGE INC.", "PLATINUM - NEW YORK MERCANTILE EXCHANGE",
-				"S&P 500 Consolidated - CHICAGO MERCANTILE EXCHANGE", "DJIA Consolidated - CHICAGO BOARD OF TRADE",
-				"NASDAQ-100 Consolidated - CHICAGO MERCANTILE EXCHANGE",
-				"RUSSELL 2000 MINI INDEX FUTURE - ICE FUTURES U.S.",
-				"NIKKEI STOCK AVERAGE - CHICAGO MERCANTILE EXCHANGE", "U.S. TREASURY BONDS - CHICAGO BOARD OF TRADE",
-				"2-YEAR U.S. TREASURY NOTES - CHICAGO BOARD OF TRADE",
-				"5-YEAR U.S. TREASURY NOTES - CHICAGO BOARD OF TRADE",
-				"10-YEAR U.S. TREASURY NOTES - CHICAGO BOARD OF TRADE", "30-DAY FEDERAL FUNDS - CHICAGO BOARD OF TRADE",
-				"AUSTRALIAN DOLLAR - CHICAGO MERCANTILE EXCHANGE", "BRAZILIAN REAL - CHICAGO MERCANTILE EXCHANGE",
-				"BRITISH POUND STERLING - CHICAGO MERCANTILE EXCHANGE", "EURO FX - CHICAGO MERCANTILE EXCHANGE",
-				"JAPANESE YEN - CHICAGO MERCANTILE EXCHANGE", "CANADIAN DOLLAR - CHICAGO MERCANTILE EXCHANGE",
-				"MEXICAN PESO - CHICAGO MERCANTILE EXCHANGE", "NEW ZEALAND DOLLAR - CHICAGO MERCANTILE EXCHANGE",
-				"RUSSIAN RUBLE - CHICAGO MERCANTILE EXCHANGE", "BITCOIN-USD - CBOE FUTURES EXCHANGE",
-				"SWISS FRANC - CHICAGO MERCANTILE EXCHANGE").collect(Collectors.toList());
+		futureslist = new String[] { "LEANHOGS", "FEEDERCATTLE", "LIVECATTLE", "LUMBER", "SUGARNo11",
+				"COFFEE", "ORANGEJUICE", "COTTON", "COCOA", "SOYBEANOIL", "SOYBEANMEAL", "SOYBEANS", "OATS", "RICE",
+				"WHEAT", "CORN", "ETHANOL", "NATURALGAS", "HEATINGOIL", "GASOLINE", "WTI", "COPPER", "PALLADIUM",
+				"GOLD", "SILVER", "PLATINUM", "S&P", "DJIA", "NASDAQ", "RUSSELL2000MINI", "NIKKEI", "USTREASURYBONDS",
+				"2YEARUSTREASURY NOTES", "5YEARUSTREASURY NOTES", "10YEARUSTREASURYNOTES",
+				"30DAYFEDERALFUNDS", "AUSTRALIANDOLLAR",
+				"BRAZILIANREAL", "BRITISHPOUNDSTERLING",
+				"EUROFX", "JAPANESEYEN",
+				"CANADIANDOLLAR", "MEXICANPESO",
+				"NEWZEALANDDOLLAR", "RUSSIANRUBLE",
+				"BITCOIN", "SWISSFRANC" };
+
+		/*
+		 * futures_allowed = Stream.of("LEAN HOGS - CHICAGO MERCANTILE EXCHANGE",
+		 * "FEEDER CATTLE - CHICAGO MERCANTILE EXCHANGE",
+		 * "LIVE CATTLE - CHICAGO MERCANTILE EXCHANGE",
+		 * "RANDOM LENGTH LUMBER - CHICAGO MERCANTILE EXCHANGE",
+		 * "SUGAR NO. 11 - ICE FUTURES U.S.", "COFFEE C - ICE FUTURES U.S.",
+		 * "FRZN CONCENTRATED ORANGE JUICE - ICE FUTURES U.S.",
+		 * "COTTON NO. 2 - ICE FUTURES U.S.", "COCOA - ICE FUTURES U.S.",
+		 * "SOYBEAN OIL - CHICAGO BOARD OF TRADE",
+		 * "SOYBEAN MEAL - CHICAGO BOARD OF TRADE", "SOYBEANS - CHICAGO BOARD OF TRADE",
+		 * "OATS - CHICAGO BOARD OF TRADE", "ROUGH RICE - CHICAGO BOARD OF TRADE",
+		 * "WHEAT-SRW - CHICAGO BOARD OF TRADE", "CORN - CHICAGO BOARD OF TRADE",
+		 * "CBT ETHANOL - CHICAGO BOARD OF TRADE",
+		 * "NATURAL GAS - NEW YORK MERCANTILE EXCHANGE", "#2 HEATING OIL",
+		 * "GASOLINE BLENDSTOCK (RBOB) - NEW YORK MERCANTILE EXCHANGE",
+		 * "CRUDE OIL, LIGHT SWEET - NEW YORK MERCANTILE EXCHANGE",
+		 * "COPPER-GRADE #1 - COMMODITY EXCHANGE INC.",
+		 * "PALLADIUM - NEW YORK MERCANTILE EXCHANGE", "GOLD - COMMODITY EXCHANGE INC.",
+		 * "SILVER - COMMODITY EXCHANGE INC.",
+		 * "PLATINUM - NEW YORK MERCANTILE EXCHANGE",
+		 * "S&P 500 Consolidated - CHICAGO MERCANTILE EXCHANGE",
+		 * "DJIA Consolidated - CHICAGO BOARD OF TRADE",
+		 * "NASDAQ-100 Consolidated - CHICAGO MERCANTILE EXCHANGE",
+		 * "RUSSELL 2000 MINI INDEX FUTURE - ICE FUTURES U.S.",
+		 * "NIKKEI STOCK AVERAGE - CHICAGO MERCANTILE EXCHANGE",
+		 * "U.S. TREASURY BONDS - CHICAGO BOARD OF TRADE",
+		 * "2-YEAR U.S. TREASURY NOTES - CHICAGO BOARD OF TRADE",
+		 * "5-YEAR U.S. TREASURY NOTES - CHICAGO BOARD OF TRADE",
+		 * "10-YEAR U.S. TREASURY NOTES - CHICAGO BOARD OF TRADE",
+		 * "30-DAY FEDERAL FUNDS - CHICAGO BOARD OF TRADE",
+		 * "AUSTRALIAN DOLLAR - CHICAGO MERCANTILE EXCHANGE",
+		 * "BRAZILIAN REAL - CHICAGO MERCANTILE EXCHANGE",
+		 * "BRITISH POUND STERLING - CHICAGO MERCANTILE EXCHANGE",
+		 * "EURO FX - CHICAGO MERCANTILE EXCHANGE",
+		 * "JAPANESE YEN - CHICAGO MERCANTILE EXCHANGE",
+		 * "CANADIAN DOLLAR - CHICAGO MERCANTILE EXCHANGE",
+		 * "MEXICAN PESO - CHICAGO MERCANTILE EXCHANGE",
+		 * "NEW ZEALAND DOLLAR - CHICAGO MERCANTILE EXCHANGE",
+		 * "RUSSIAN RUBLE - CHICAGO MERCANTILE EXCHANGE",
+		 * "BITCOIN-USD - CBOE FUTURES EXCHANGE",
+		 * "SWISS FRANC - CHICAGO MERCANTILE EXCHANGE").collect(Collectors.toList());
+		 */
 	}
 }

@@ -57,18 +57,21 @@ public class COTVisualizer {
 	public static boolean plusevent = false;
 	public static boolean minusevent = false;
 	public static JButton update;
-
+	public static COTupdater up;
+	
 	public static void main(String[] args) {
+		up = new COTupdater();
 		myframe = new JFrame("CoT Report");
 		myframe.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
 		try {
-			//myframe.setIconImage(ImageIO.read(new File("holly.png")));
-		    final  BufferedImage imageholly = ImageIO.read(COTVisualizer.class.getResource("/resources/holly.PNG"));
-		    myframe.setIconImage(imageholly); 
+			BufferedImage imageholly = null;
+			String OS = System.getProperty("os.name");
+			if (OS.startsWith("Windows")) imageholly = ImageIO.read(COTVisualizer.class.getResource("/resources/holly.PNG"));
+			else imageholly = ImageIO.read(COTVisualizer.class.getResource("/resources/holly.png"));
+			myframe.setIconImage(imageholly);
 		}
-		
-        //THIS IS THE MASTER BRANCH MASTER
+
 		catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -85,7 +88,7 @@ public class COTVisualizer {
 			}
 		});
 
-		readfiles();
+		// readfiles();
 
 		addComponentsToPane(myframe.getContentPane());
 
@@ -95,31 +98,25 @@ public class COTVisualizer {
 		myframe.repaint();
 	}
 
-	public static void readfiles() {
-		String str;
-		List<String> list = new ArrayList<String>();
-
-		try {
-			BufferedReader in = new BufferedReader(new FileReader("futures"));
-			File fut = new File("futures");
-			if (fut.exists())
-				while ((str = in.readLine()) != null) {
-					list.add(str);
-				}
-
-			in.close();
-		}
-
-		catch (IOException e) {
-			e.printStackTrace();
-		}
-
-		comboBoxList = list.toArray(new String[list.size()]);
-	}
+	/*
+	 * public static void readfiles() { String str; List<String> list = new
+	 * ArrayList<String>();
+	 * 
+	 * try { BufferedReader in = new BufferedReader(new FileReader("futures")); File
+	 * fut = new File("futures"); if (fut.exists()) while ((str = in.readLine()) !=
+	 * null) { list.add(str); }
+	 * 
+	 * in.close(); }
+	 * 
+	 * catch (IOException e) { e.printStackTrace(); }
+	 * 
+	 * comboBoxList = list.toArray(new String[list.size()]); }
+	 */
 
 	public static void addComponentsToPane(Container pane) {
 		tb = new JMenuBar();
 		JLabel label = new JLabel("Select:  ");
+		comboBoxList = up.getFuturesList();
 		JComboBox<String> mycombobox = new JComboBox<String>(comboBoxList);
 		mycombobox.setMaximumSize(new Dimension(300, 30));
 
@@ -136,14 +133,50 @@ public class COTVisualizer {
 				BufferedReader in;
 
 				try {
-					String selected_path = "tables/" + selected;
-					in = new BufferedReader(new FileReader(selected_path));
-					while ((str = in.readLine()) != null) {
-						String[] tokens = str.split("\\s+");
-						dates_list.add(tokens[0]);
-						commercials_list.add(Integer.valueOf(tokens[1]));
-						largetraders_list.add(Integer.valueOf(tokens[2]));
-						smalltraders_list.add(Integer.valueOf(tokens[3]));
+					// if(Files.isDirectory(Paths.get("tables"))) {
+					File tablesFolder = new File("tables");
+                    if(!tablesFolder.exists()) 
+					if (tablesFolder.isDirectory()) {
+						String selected_path = "tables/" + selected;
+						in = new BufferedReader(new FileReader(selected_path));
+						while ((str = in.readLine()) != null) {
+							String[] tokens = str.split("\\s+");
+							dates_list.add(tokens[0]);
+							commercials_list.add(Integer.valueOf(tokens[1]));
+							largetraders_list.add(Integer.valueOf(tokens[2]));
+							smalltraders_list.add(Integer.valueOf(tokens[3]));
+						}
+
+						dates = dates_list.toArray(new String[dates_list.size()]);
+						commercials = commercials_list.toArray(new Integer[commercials_list.size()]);
+						largetraders = largetraders_list.toArray(new Integer[largetraders_list.size()]);
+						smalltraders = smalltraders_list.toArray(new Integer[smalltraders_list.size()]);
+						oszillator26 = new Integer[dates.length - 26];
+
+						List<Integer> oszillator26_list = new ArrayList<Integer>();
+						int t = 0;
+						while (t < oszillator26.length) {
+							oszillator26_list = commercials_list.subList(t, 26 + t);
+							int min26 = t + oszillator26_list.indexOf(Collections.min(oszillator26_list));
+							int max26 = t + oszillator26_list.indexOf(Collections.max(oszillator26_list));
+
+							int d = commercials[t];
+							int f = commercials[max26];
+							int g = commercials[min26];
+							int o = 0;
+							if ((f - g) != 0)
+								o = 100 * (d - g) / (f - g);
+
+							oszillator26[t] = o;
+							t++;
+						}
+
+						dx = 0;
+						dy = 0;
+						MyOszillator.drawoszillator = true;
+						MyRectanglePanel.drawgraph = true;
+						myframe.repaint();
+
 					}
 				}
 
@@ -155,35 +188,28 @@ public class COTVisualizer {
 					e.printStackTrace();
 				}
 
-				dates = dates_list.toArray(new String[dates_list.size()]);
-				commercials = commercials_list.toArray(new Integer[commercials_list.size()]);
-				largetraders = largetraders_list.toArray(new Integer[largetraders_list.size()]);
-				smalltraders = smalltraders_list.toArray(new Integer[smalltraders_list.size()]);
-				oszillator26 = new Integer[dates.length - 26];
-
-				List<Integer> oszillator26_list = new ArrayList<Integer>();
-				int t = 0;
-				while (t < oszillator26.length) {
-					oszillator26_list = commercials_list.subList(t, 26 + t);
-					int min26 = t + oszillator26_list.indexOf(Collections.min(oszillator26_list));
-					int max26 = t + oszillator26_list.indexOf(Collections.max(oszillator26_list));
-
-					int d = commercials[t];
-					int f = commercials[max26];
-					int g = commercials[min26];
-					int o = 0;
-					if ((f - g) != 0)
-						o = 100 * (d - g) / (f - g);
-
-					oszillator26[t] = o;
-					t++;
-				}
-
-				dx = 0;
-				dy = 0;
-				MyOszillator.drawoszillator = true;
-				MyRectanglePanel.drawgraph = true;
-				myframe.repaint();
+				/*
+				 * dates = dates_list.toArray(new String[dates_list.size()]); commercials =
+				 * commercials_list.toArray(new Integer[commercials_list.size()]); largetraders
+				 * = largetraders_list.toArray(new Integer[largetraders_list.size()]);
+				 * smalltraders = smalltraders_list.toArray(new
+				 * Integer[smalltraders_list.size()]); oszillator26 = new Integer[dates.length -
+				 * 26];
+				 * 
+				 * List<Integer> oszillator26_list = new ArrayList<Integer>(); int t = 0; while
+				 * (t < oszillator26.length) { oszillator26_list = commercials_list.subList(t,
+				 * 26 + t); int min26 = t +
+				 * oszillator26_list.indexOf(Collections.min(oszillator26_list)); int max26 = t
+				 * + oszillator26_list.indexOf(Collections.max(oszillator26_list));
+				 * 
+				 * int d = commercials[t]; int f = commercials[max26]; int g =
+				 * commercials[min26]; int o = 0; if ((f - g) != 0) o = 100 * (d - g) / (f - g);
+				 * 
+				 * oszillator26[t] = o; t++; }
+				 * 
+				 * dx = 0; dy = 0; MyOszillator.drawoszillator = true;
+				 * MyRectanglePanel.drawgraph = true; myframe.repaint();
+				 */
 			}
 		});
 
@@ -246,7 +272,7 @@ public class COTVisualizer {
 		update.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				COTupdater up = new COTupdater();
+				// COTupdater up = new COTupdater();
 				up.update();
 			}
 		});
@@ -322,7 +348,10 @@ public class COTVisualizer {
 				fadenkreuzx = arg0.getX();
 				fadenkreuzy = arg0.getY();
 
-				if (!selected.equals("")) {
+				File tablesFolder = new File("tables");
+			
+				if (!selected.equals("") && (tablesFolder.isDirectory())) {
+					
 					MyRectanglePanel.drawgraph = true;
 					MyOszillator.drawoszillator = true;
 					myframe.repaint();
