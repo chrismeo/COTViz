@@ -10,6 +10,7 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -62,9 +63,12 @@ public class COTVisualizer {
 		myframe.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
 		try {
-			myframe.setIconImage(ImageIO.read(new File("holly.png")));
+			//myframe.setIconImage(ImageIO.read(new File("holly.png")));
+		    final  BufferedImage imageholly = ImageIO.read(COTVisualizer.class.getResource("/resources/holly.PNG"));
+		    myframe.setIconImage(imageholly); 
 		}
-
+		
+        //THIS IS THE FUTURES BRANCH
 		catch (IOException e) {
 			e.printStackTrace();
 		}

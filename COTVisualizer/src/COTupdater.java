@@ -73,7 +73,7 @@ public class COTupdater {
 					InputStream fs = new FileInputStream(list_of_files[l]);
 					HSSFWorkbook wb = new HSSFWorkbook(fs);
 					HSSFSheet sheet = wb.getSheetAt(0);
-
+		
 					for (Row row : sheet) {
 						Cell cell0 = row.getCell(0);
 						String celltext0 = cell0.getStringCellValue();
@@ -85,6 +85,7 @@ public class COTupdater {
 							Cell cell2 = row.getCell(2);
 							Date date = new Date();
 							date = cell2.getDateCellValue();
+							
 							DateFormat df = new SimpleDateFormat("MM/yy");
 							String datestring = df.format(date);
 							if ((datehead != null) && (datestring.compareTo(datehead) == 0)) {
@@ -118,7 +119,7 @@ public class COTupdater {
 							line += String.valueOf(smalltraders);
 
 							//pw.println(line);
-							tablefw.write(line+"\n");
+							tablefw.write(line+"\n"); System.out.println(line);
 							
 						}
 					}
