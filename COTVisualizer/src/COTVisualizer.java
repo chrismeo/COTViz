@@ -68,7 +68,7 @@ public class COTVisualizer {
 		    myframe.setIconImage(imageholly); 
 		}
 		
-        //THIS IS THE FUTURES BRANCH
+        //THIS IS THE MASTER BRANCH
 		catch (IOException e) {
 			e.printStackTrace();
 		}
