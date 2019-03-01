@@ -1,6 +1,7 @@
 import java.awt.Color;
 import java.awt.Container;
 import java.awt.Dimension;
+import java.awt.Event;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -27,6 +28,7 @@ import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenuBar;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
 import java.awt.Cursor;
@@ -45,10 +47,10 @@ public class COTVisualizer {
 	public static Integer[] largetraders;
 	public static Integer[] smalltraders;
 	public static Integer[] oszillator26;
-	public static int fadenkreuzx, fadenkreuzy;
-	public static boolean drawfadenkreuz = false;
+	public static int crosshairx, crosshairy;
+	public static boolean drawcrosshair = false;
 	public static boolean grid = false;
-	public static JCheckBox grid_box, fadenkreuz_box, plus, minus;
+	public static JCheckBox grid_box, crosshair_box, plus, minus;
 	public static int drag_x;
 	public static Point mousePT;
 	public static int dx = 0;
@@ -59,8 +61,10 @@ public class COTVisualizer {
 	public static JButton update;
 	public static COTupdater up;
 	
+	
 	public static void main(String[] args) {
 		up = new COTupdater();
+		up.init();
 		myframe = new JFrame("CoT Report");
 		myframe.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
@@ -133,9 +137,7 @@ public class COTVisualizer {
 				BufferedReader in;
 
 				try {
-					// if(Files.isDirectory(Paths.get("tables"))) {
-					File tablesFolder = new File("tables");
-                    if(!tablesFolder.exists()) 
+					File tablesFolder = new File("tables"); 
 					if (tablesFolder.isDirectory()) {
 						String selected_path = "tables/" + selected;
 						in = new BufferedReader(new FileReader(selected_path));
@@ -147,11 +149,15 @@ public class COTVisualizer {
 							smalltraders_list.add(Integer.valueOf(tokens[3]));
 						}
 
+						Collections.reverse(dates_list); //
 						dates = dates_list.toArray(new String[dates_list.size()]);
+						Collections.reverse(commercials_list); //
 						commercials = commercials_list.toArray(new Integer[commercials_list.size()]);
+						Collections.reverse(largetraders_list);//
 						largetraders = largetraders_list.toArray(new Integer[largetraders_list.size()]);
+						Collections.reverse(smalltraders_list); //
 						smalltraders = smalltraders_list.toArray(new Integer[smalltraders_list.size()]);
-						oszillator26 = new Integer[dates.length - 26];
+						oszillator26 = new Integer[dates.length - 26]; 
 
 						List<Integer> oszillator26_list = new ArrayList<Integer>();
 						int t = 0;
@@ -214,7 +220,7 @@ public class COTVisualizer {
 		});
 
 		grid_box = new JCheckBox();
-		grid_box.setText("Grid");
+		grid_box.setText("grid");
 		grid_box.addItemListener(new ItemListener() {
 			@Override
 			public void itemStateChanged(ItemEvent arg0) {
@@ -227,13 +233,13 @@ public class COTVisualizer {
 			}
 		});
 
-		fadenkreuz_box = new JCheckBox();
-		fadenkreuz_box.setText("Fadenkreuz");
+		crosshair_box = new JCheckBox();
+		crosshair_box.setText("crosshair");
 
-		fadenkreuz_box.addItemListener(new ItemListener() {
+		crosshair_box.addItemListener(new ItemListener() {
 			@Override
 			public void itemStateChanged(ItemEvent arg0) {
-				drawfadenkreuz = !drawfadenkreuz;
+				drawcrosshair = !drawcrosshair;
 				if (!selected.equals("")) {
 					MyRectanglePanel.drawgraph = true;
 					MyOszillator.drawoszillator = true;
@@ -272,16 +278,22 @@ public class COTVisualizer {
 		update.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				// COTupdater up = new COTupdater();
+				//JOptionPane.showInternalMessageDialog(panelpaint, "please wait");
+				MyRectanglePanel.updating= true;
+				myframe.repaint();
 				up.update();
+				//JOptionPane.showInternalMessageDialog(panelpaint, "data updated");
+				//myframe.repaint();
 			}
 		});
+		
+		
 
 		tb.add(label);
 		tb.add(mycombobox);
 		JLabel dummy = new JLabel("                                                                         ");
 		tb.add(grid_box);
-		tb.add(fadenkreuz_box);
+		tb.add(crosshair_box);
 		tb.add(plus);
 		tb.add(minus);
 		tb.add(update);
@@ -345,8 +357,8 @@ public class COTVisualizer {
 					myframe.setCursor(cursor);
 				}
 
-				fadenkreuzx = arg0.getX();
-				fadenkreuzy = arg0.getY();
+				crosshairx = arg0.getX();
+				crosshairy = arg0.getY();
 
 				File tablesFolder = new File("tables");
 			
