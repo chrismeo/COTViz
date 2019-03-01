@@ -1,6 +1,7 @@
 import java.awt.Color;
 import java.awt.Container;
 import java.awt.Dimension;
+import java.awt.Event;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -27,6 +28,7 @@ import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenuBar;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
 import java.awt.Cursor;
@@ -59,8 +61,10 @@ public class COTVisualizer {
 	public static JButton update;
 	public static COTupdater up;
 	
+	
 	public static void main(String[] args) {
 		up = new COTupdater();
+		up.init();
 		myframe = new JFrame("CoT Report");
 		myframe.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
@@ -145,9 +149,13 @@ public class COTVisualizer {
 							smalltraders_list.add(Integer.valueOf(tokens[3]));
 						}
 
+						Collections.reverse(dates_list); //
 						dates = dates_list.toArray(new String[dates_list.size()]);
+						Collections.reverse(commercials_list); //
 						commercials = commercials_list.toArray(new Integer[commercials_list.size()]);
+						Collections.reverse(largetraders_list);//
 						largetraders = largetraders_list.toArray(new Integer[largetraders_list.size()]);
+						Collections.reverse(smalltraders_list); //
 						smalltraders = smalltraders_list.toArray(new Integer[smalltraders_list.size()]);
 						oszillator26 = new Integer[dates.length - 26]; 
 
@@ -270,10 +278,16 @@ public class COTVisualizer {
 		update.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				// COTupdater up = new COTupdater();
+				//JOptionPane.showInternalMessageDialog(panelpaint, "please wait");
+				MyRectanglePanel.updating= true;
+				myframe.repaint();
 				up.update();
+				//JOptionPane.showInternalMessageDialog(panelpaint, "data updated");
+				//myframe.repaint();
 			}
 		});
+		
+		
 
 		tb.add(label);
 		tb.add(mycombobox);

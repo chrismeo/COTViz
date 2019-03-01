@@ -15,6 +15,8 @@ public class MyRectanglePanel extends JPanel{
    static boolean drawgraph = false;
    public static int factor = 1;
    public static int factorm = 1;
+   public static boolean updating = false;
+   
   
    
    @Override
@@ -43,6 +45,12 @@ public class MyRectanglePanel extends JPanel{
 	  g.setColor(Color.LIGHT_GRAY);
 	  g.fillRect(width-space_right+1, 0, width, height);
 	 
+	  
+	  if(updating) {
+		  g.drawString("UPDATING...", 100, 100); 
+		 
+		  updating = false;
+	  }
 	  
 	  //crosshair
       if((COTVisualizer.drawcrosshair) && (drawgraph))
