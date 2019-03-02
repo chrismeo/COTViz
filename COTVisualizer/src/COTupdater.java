@@ -2,6 +2,7 @@ import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -9,6 +10,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -34,13 +36,11 @@ public class COTupdater {
 	 * public COTupdater() { makefutureslist(); makehash(); }
 	 */
 
-	
-	public void init()
-	{
+	public void init() {
 		makefutureslist();
 		makehash();
 	}
-	
+
 	public void update() {
 		readhead();
 		downloadCOT();
@@ -51,16 +51,16 @@ public class COTupdater {
 	private void writehead() {
 		File headfile = new File("head");
 		try {
-			FileWriter fw = new FileWriter(headfile, false);			
+			FileWriter fw = new FileWriter(headfile, false);
 			fw.write(currentdate_string);
 			fw.close();
-		} 
-		
+		}
+
 		catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
-	
+
 	private void readhead() {
 		File file = new File("head");
 		if (file.exists()) {
@@ -73,15 +73,15 @@ public class COTupdater {
 					last_year = 2000 + yy;
 				if (yy < 0)
 					last_year = 1900 + yy;
-	
+
 				br.close();
 			}
-			
+
 			catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
-		
+
 		if (!file.exists()) {
 			last_year = 1986;
 		}
@@ -89,7 +89,7 @@ public class COTupdater {
 
 	private void write_future_files() {
 		File headfile = new File("head");
-		
+
 		File dir = new File("tables");
 		if (!dir.exists()) {
 			dir.mkdir();
@@ -100,35 +100,35 @@ public class COTupdater {
 		for (int k = 0; k < futureslist.length; k++) {
 			String name = futureslist[k];
 			String path = "";
-			String pathold = "";
-			
+			// String pathold = "";
+
 			String OS = System.getProperty("os.name");
-			if ((OS.startsWith("Windows")) && (!headfile.exists()))
+			if (OS.startsWith("Windows"))
 				path = folder + "\\" + name;
-			if ((OS.startsWith("Windows")) && (headfile.exists())) {
-				path = folder + "\\" + name + "temp";
-				pathold = folder + "\\" + name;
-			}
-			if ((!OS.startsWith("Windows")) && (!headfile.exists()))
+			if (!OS.startsWith("Windows"))
 				path = folder + "/" + name;
-			if ((!OS.startsWith("Windows")) && (headfile.exists())) {
-				path = folder + "/" + name + "temp";
-				pathold = folder + "/" + name;
-			}
+			/*
+			 * if ((OS.startsWith("Windows")) && (!headfile.exists())) path = folder + "\\"
+			 * + name; if ((OS.startsWith("Windows")) && (headfile.exists())) { path =
+			 * folder + "\\" + name + "temp"; pathold = folder + "\\" + name; } if
+			 * ((!OS.startsWith("Windows")) && (!headfile.exists())) path = folder + "/" +
+			 * name; if ((!OS.startsWith("Windows")) && (headfile.exists())) { path = folder
+			 * + "/" + name + "temp"; pathold = folder + "/" + name; }
+			 */
 
 			File f = new File(path);
 			try {
 				FileWriter tablefw = new FileWriter(f, true);
-				for (int l = 0; l<list_of_files.length; l++) {
-				//for (int l = list_of_files.length - 1; l >= 0; l--) {
+				for (int l = 0; l < list_of_files.length; l++) {
+					// for (int l = list_of_files.length - 1; l >= 0; l--) {
 					InputStream fs = new FileInputStream(list_of_files[l]);
 					HSSFWorkbook wb = new HSSFWorkbook(fs);
 					HSSFSheet sheet = wb.getSheetAt(0);
 
 					int r = sheet.getLastRowNum();
-					for(int j=r-1;j>=0;j--) {
+					for (int j = r - 1; j >= 0; j--) {
 						Row row = sheet.getRow(j);
-					//for (Row row : sheet) {
+						// for (Row row : sheet) {
 						Cell cell0 = row.getCell(0);
 						String celltext0 = cell0.getStringCellValue();
 						String line = "";
@@ -141,53 +141,63 @@ public class COTupdater {
 							date = cell2.getDateCellValue();
 
 							DateFormat df = new SimpleDateFormat("MM/yy");
+						    DateFormat df2 = new SimpleDateFormat("dd/MM/yy");
 							String datestring = df.format(date);
 							
-							DateFormat df2 = new SimpleDateFormat("dd/MM/yy");
-							String datestring2 = df2.format(date);
-
-							if ((lastdate_string != null) && (datestring2.compareTo(lastdate_string) == 0)) {
-								break;
+							DateFormat formatemp = new SimpleDateFormat("dd/MM/yy");
+							String datestringtemp = formatemp.format(date);
+							
+							boolean check = false;
+							if (headfile.exists()) {
+								Date lastdate = df2.parse(lastdate_string);
+								if (date.compareTo(lastdate) <= 0)
+									check = false;
+								if (date.compareTo(lastdate) > 0) {
+									check = true;
+									System.out.println("datestring: "+datestringtemp+", lastdate_string: "+lastdate_string);
+								}
 							}
-							
-							line += datestring;
-							line += " ";
+				
+							if ((check) || (!headfile.exists())) {
+								line += datestring;
+								line += " ";
 
-							// Commercials
-							Cell cell11 = row.getCell(11);
-							Cell cell12 = row.getCell(12);
-							double result = cell11.getNumericCellValue() - cell12.getNumericCellValue();
-							int commercials = (int) result;
-							line += String.valueOf(commercials);
-							line += " ";
+								// Commercials
+								Cell cell11 = row.getCell(11);
+								Cell cell12 = row.getCell(12);
+								double result = cell11.getNumericCellValue() - cell12.getNumericCellValue();
+								int commercials = (int) result;
+								line += String.valueOf(commercials);
+								line += " ";
 
-							// Large Traders
-							Cell cell8 = row.getCell(8);
-							Cell cell9 = row.getCell(9);
-							double result2 = cell8.getNumericCellValue() - cell9.getNumericCellValue();
-							int largetraders = (int) result2;
-							line += String.valueOf(largetraders);
-							line += " ";
+								// Large Traders
+								Cell cell8 = row.getCell(8);
+								Cell cell9 = row.getCell(9);
+								double result2 = cell8.getNumericCellValue() - cell9.getNumericCellValue();
+								int largetraders = (int) result2;
+								line += String.valueOf(largetraders);
+								line += " ";
 
-							// Small Traders
-							Cell cell15 = row.getCell(15);
-							Cell cell16 = row.getCell(16);
-							double result3 = cell15.getNumericCellValue() - cell16.getNumericCellValue();
-							int smalltraders = (int) result3;
-							line += String.valueOf(smalltraders);
+								// Small Traders
+								Cell cell15 = row.getCell(15);
+								Cell cell16 = row.getCell(16);
+								double result3 = cell15.getNumericCellValue() - cell16.getNumericCellValue();
+								int smalltraders = (int) result3;
+								line += String.valueOf(smalltraders);
 
-							tablefw.write(line + "\n");
-							
-							/*
-							 * if(headfile.exists()) { String strold; File old = new File(pathold);
-							 * BufferedReader br = new BufferedReader(new FileReader(pathold)); FileWriter
-							 * fw = new FileWriter(f, true); while ((strold = br.readLine()) != null) {
-							 * fw.write(strold + "\n"); }
-							 * 
-							 * br.close(); fw.close();
-							 * 
-							 * old.renameTo(f); }
-							 */
+								tablefw.write(line + "\n");
+
+								/*
+								 * if(headfile.exists()) { String strold; File old = new File(pathold);
+								 * BufferedReader br = new BufferedReader(new FileReader(pathold)); FileWriter
+								 * fw = new FileWriter(f, true); while ((strold = br.readLine()) != null) {
+								 * fw.write(strold + "\n"); }
+								 * 
+								 * br.close(); fw.close();
+								 * 
+								 * old.renameTo(f); }
+								 */
+							}
 						}
 					}
 
@@ -196,19 +206,19 @@ public class COTupdater {
 				}
 
 				tablefw.close();
-	//			if(headfile.exists()) f.delete();
+				// if(headfile.exists()) f.delete();
 			}
 
-			catch (IOException e) {
+			catch (IOException | ParseException e) {
 				e.printStackTrace();
 			}
 		}
 
-		//currentdate_string
+		// currentdate_string
 		InputStream is;
 		try {
-			int l= list_of_files.length;
-			is = new FileInputStream(list_of_files[l-1]);
+			int l = list_of_files.length;
+			is = new FileInputStream(list_of_files[l - 1]);
 			HSSFWorkbook hssfwb = new HSSFWorkbook(is);
 			HSSFSheet sheet = hssfwb.getSheetAt(0);
 			Row row = sheet.getRow(1);
@@ -216,17 +226,16 @@ public class COTupdater {
 			Date date = new Date();
 			date = cell2.getDateCellValue();
 			DateFormat df2 = new SimpleDateFormat("dd/MM/yy");
-			currentdate_string = df2.format(date);		
-		} 
-		
+			currentdate_string = df2.format(date);
+		}
+
 		catch (FileNotFoundException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-	
-		
+
 		// delete folder unzip/
 		File fileunzip = new File("unzip/");
 		File[] f = fileunzip.listFiles();
@@ -269,7 +278,7 @@ public class COTupdater {
 				}
 			}
 
-			    catch (IOException e) {
+			catch (IOException e) {
 			}
 		}
 
