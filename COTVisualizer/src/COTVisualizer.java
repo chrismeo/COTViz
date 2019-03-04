@@ -31,6 +31,8 @@ import javax.swing.JMenuBar;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
+import javax.swing.SwingUtilities;
+
 import java.awt.Cursor;
 
 public class COTVisualizer {
@@ -61,24 +63,22 @@ public class COTVisualizer {
 	public static JButton update;
 	public static COTupdater up;
 	
-	
 	public static void main(String[] args) {
 		up = new COTupdater();
 		up.init();
-		myframe = new JFrame("CoT Report");
+		myframe = new JFrame("COTViz");
 		myframe.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-		try {
-			BufferedImage imageholly = null;
-			String OS = System.getProperty("os.name");
-			if (OS.startsWith("Windows")) imageholly = ImageIO.read(COTVisualizer.class.getResource("/resources/holly.PNG"));
-			else imageholly = ImageIO.read(COTVisualizer.class.getResource("/resources/holly.png"));
-			myframe.setIconImage(imageholly);
-		}
-
-		catch (IOException e) {
-			e.printStackTrace();
-		}
+		/*
+		 * try { BufferedImage imageholly = null; String OS =
+		 * System.getProperty("os.name"); if (OS.startsWith("Windows")) imageholly =
+		 * ImageIO.read(COTVisualizer.class.getResource("/resources/holly.PNG")); else
+		 * imageholly =
+		 * ImageIO.read(COTVisualizer.class.getResource("/resources/holly.png"));
+		 * myframe.setIconImage(imageholly); }
+		 * 
+		 * catch (IOException e) { e.printStackTrace(); }
+		 */
 
 		// repaint after resize
 		myframe.addComponentListener(new ComponentAdapter() {
@@ -137,7 +137,7 @@ public class COTVisualizer {
 				BufferedReader in;
 
 				try {
-					File tablesFolder = new File("tables"); 
+					File tablesFolder = new File("tables");
 					if (tablesFolder.isDirectory()) {
 						String selected_path = "tables/" + selected;
 						in = new BufferedReader(new FileReader(selected_path));
@@ -157,7 +157,7 @@ public class COTVisualizer {
 						largetraders = largetraders_list.toArray(new Integer[largetraders_list.size()]);
 						Collections.reverse(smalltraders_list); //
 						smalltraders = smalltraders_list.toArray(new Integer[smalltraders_list.size()]);
-						oszillator26 = new Integer[dates.length - 26]; 
+						oszillator26 = new Integer[dates.length - 26];
 
 						List<Integer> oszillator26_list = new ArrayList<Integer>();
 						int t = 0;
@@ -278,16 +278,28 @@ public class COTVisualizer {
 		update.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				//JOptionPane.showInternalMessageDialog(panelpaint, "please wait");
-				MyRectanglePanel.updating= true;
+				MyRectanglePanel.updating = true;
+				
 				myframe.repaint();
-				up.update();
-				//JOptionPane.showInternalMessageDialog(panelpaint, "data updated");
-				//myframe.repaint();
+
+				new Thread(new Runnable() {
+					@Override
+					public void run() {
+						up.update();
+					
+						SwingUtilities.invokeLater(new Runnable() {
+							@Override
+							public void run() {
+								MyRectanglePanel.updating = false;
+						
+								myframe.repaint();
+							}
+						});
+					}
+
+				}).start();
 			}
 		});
-		
-		
 
 		tb.add(label);
 		tb.add(mycombobox);
@@ -361,9 +373,9 @@ public class COTVisualizer {
 				crosshairy = arg0.getY();
 
 				File tablesFolder = new File("tables");
-			
+
 				if (!selected.equals("") && (tablesFolder.isDirectory())) {
-					
+
 					MyRectanglePanel.drawgraph = true;
 					MyOszillator.drawoszillator = true;
 					myframe.repaint();
