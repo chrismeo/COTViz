@@ -63,7 +63,7 @@ public class COTVisualizer {
 	public static JButton update;
 	public static COTupdater up;
 	
-	public static void main(String[] args) {
+	public static void main(String[] args) { //TEST
 		up = new COTupdater();
 		up.init();
 		myframe = new JFrame("COTViz");
