@@ -63,6 +63,7 @@ public class COTVisualizer {
 	public static JButton update;
 	public static COTupdater up;
 	
+	
 	public static void main(String[] args) { //TEST
 		up = new COTupdater();
 		up.init();
@@ -280,24 +281,23 @@ public class COTVisualizer {
 			public void actionPerformed(ActionEvent arg0) {
 				MyRectanglePanel.updating = true;
 				
+				//show updating message
 				myframe.repaint();
-
+	
+				//update has to run concurrent to showing the update message
 				new Thread(new Runnable() {
-					@Override
-					public void run() {
-						up.update();
-					
-						SwingUtilities.invokeLater(new Runnable() {
-							@Override
-							public void run() {
-								MyRectanglePanel.updating = false;
-						
-								myframe.repaint();
-							}
-						});
-					}
-
+				   @Override public void run() { 
+					   up.update();
+				  
+				       SwingUtilities.invokeLater(new Runnable() {
+				          @Override public void run() { 
+				        	  MyRectanglePanel.updating = false;
+				              myframe.repaint();
+				          } 
+				       }); 
+				   }
 				}).start();
+				 
 			}
 		});
 
