@@ -31,8 +31,7 @@ public class parseFiles implements Runnable{
     }
 	
 	@Override
-	public void run() { System.out.println("start parsing");
-		
+	public void run() { 
 		// TODO Auto-generated method stub
 		for (int k = start; k <= end; k++) {
 			String name = futureslist[k];
@@ -44,8 +43,11 @@ public class parseFiles implements Runnable{
 			if (!OS.startsWith("Windows"))
 				path = folder + "/" + name;
 			
-
-			File f = new File(path); System.out.println("file :"+f);
+			File f = new File(path); 
+			MyRectanglePanel.test = true;
+			MyRectanglePanel.filename = name;
+			COTVisualizer.myframe.repaint();
+			
 			try {
 				FileWriter tablefw = new FileWriter(f, true);
 				for (int l = 0; l < list_of_files.length; l++) {
@@ -71,46 +73,33 @@ public class parseFiles implements Runnable{
 							DateFormat df = new SimpleDateFormat("MM/yy");
 						    DateFormat df2 = new SimpleDateFormat("dd/MM/yy");
 							String datestring = df.format(date);
-							/*							
-							boolean check = false;
-							if (headfile.exists()) {
-								Date lastdate = df2.parse(lastdate_string);
-								if (date.compareTo(lastdate) <= 0)
-									check = false;
-								if (date.compareTo(lastdate) > 0) {
-									check = true;
-								}
-							}
-				
-							if ((check) || (!headfile.exists())) {*/
-								line += datestring;
-								line += " ";
-
-								// Commercials
-								Cell cell11 = row.getCell(11);
-								Cell cell12 = row.getCell(12);
-								double result = cell11.getNumericCellValue() - cell12.getNumericCellValue();
-								int commercials = (int) result;
-								line += String.valueOf(commercials);
-								line += " ";
-
-								// Large Traders
-								Cell cell8 = row.getCell(8);
-								Cell cell9 = row.getCell(9);
-								double result2 = cell8.getNumericCellValue() - cell9.getNumericCellValue();
-								int largetraders = (int) result2;
-								line += String.valueOf(largetraders);
-								line += " ";
-
-								// Small Traders
-								Cell cell15 = row.getCell(15);
-								Cell cell16 = row.getCell(16);
-								double result3 = cell15.getNumericCellValue() - cell16.getNumericCellValue();
-								int smalltraders = (int) result3;
-								line += String.valueOf(smalltraders);
-
-								tablefw.write(line + "\n");
 							
+							line += datestring;
+							line += " ";
+
+							// Commercials
+							Cell cell11 = row.getCell(11);
+							Cell cell12 = row.getCell(12);
+							double result = cell11.getNumericCellValue() - cell12.getNumericCellValue();
+							int commercials = (int) result;
+							line += String.valueOf(commercials);
+							line += " ";
+
+							// Large Traders
+							Cell cell8 = row.getCell(8);
+							Cell cell9 = row.getCell(9);
+							double result2 = cell8.getNumericCellValue() - cell9.getNumericCellValue();
+							int largetraders = (int) result2;
+							line += String.valueOf(largetraders);
+							line += " ";
+
+							// Small Traders
+							Cell cell15 = row.getCell(15);
+							Cell cell16 = row.getCell(16);
+							double result3 = cell15.getNumericCellValue() - cell16.getNumericCellValue();
+							int smalltraders = (int) result3;
+							line += String.valueOf(smalltraders);
+							tablefw.write(line + "\n");
 						}
 					}
 

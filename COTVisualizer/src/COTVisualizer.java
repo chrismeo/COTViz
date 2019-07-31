@@ -236,11 +236,24 @@ public class COTVisualizer {
 				//update has to run concurrent to showing the update message
 				new Thread(new Runnable() {
 				   @Override public void run() { 
+					   up.readhead();
+					   
+					   MyRectanglePanel.downloading = true;
+					   myframe.repaint();
+					   up.downloadCOT();
+					   
+					   
+					   MyRectanglePanel.creatingtables = true;
+					   MyRectanglePanel.downloading = false; 
+					   myframe.repaint();
 					   up.update();
 				  
 				       SwingUtilities.invokeLater(new Runnable() {
 				          @Override public void run() { 
 				        	  MyRectanglePanel.updating = false;
+				        	  //MyRectanglePanel.downloading = false; //
+				        	  MyRectanglePanel.creatingtables = false;
+				        	  MyRectanglePanel.test = false;
 				              myframe.repaint();
 				          } 
 				       }); 

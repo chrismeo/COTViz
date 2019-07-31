@@ -13,8 +13,10 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.StringTokenizer;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -45,14 +47,19 @@ public class COTupdater {
 		makehash();
 	}
 
+	
+	
 	public void update() {
 		//DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 		//Date date = new Date();
 		//System.out.println(dateFormat.format(date)); //2016/11/16 12:08:43
-		readhead(); 
-		downloadCOT(); 		
-		if (checkupdate()) writefuturefiles();
-		writehead();
+		
+		//readhead(); 
+		//downloadCOT(); 		
+		if (checkupdate()) { 
+			writefuturefiles();
+		    writehead();
+		}
 		//Date date2 = new Date();
 		//System.out.println(dateFormat.format(date2)); //2016/11/16 12:08:43
 	}
@@ -70,7 +77,7 @@ public class COTupdater {
 		}
 	}
 
-	private void readhead() {
+	public void readhead() {
 		File file = new File("head");
 		if (file.exists()) {
 			try {
@@ -155,7 +162,7 @@ public class COTupdater {
 		    }
 		
 		    folder = dir.getPath();
-		
+		    
 		    Thread t1 = new Thread(new parseFiles(folder, futureslist, 0, 9, list_of_files, hash));
 		    t1.start();
 		    Thread t2 = new Thread(new parseFiles(folder, futureslist, 10, 19, list_of_files, hash));
@@ -191,7 +198,6 @@ public class COTupdater {
 		}
 		catch (IOException e) {e.printStackTrace();}
 				
-		
 		// delete folder unzip/
 		File fileunzip = new File("unzip/");
 		File[] f = fileunzip.listFiles();
@@ -199,11 +205,10 @@ public class COTupdater {
 			s.delete();
 		}
 
-		fileunzip.delete();
-				
+		fileunzip.delete();				
 	}
 
-	private void downloadCOT() { 
+	public void downloadCOT() { 
 		int year = Calendar.getInstance().get(Calendar.YEAR);
 		File dir = new File("cot-excel");
 		dir.mkdir();

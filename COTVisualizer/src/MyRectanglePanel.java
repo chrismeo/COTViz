@@ -19,6 +19,10 @@ public class MyRectanglePanel extends JPanel {
 	public static int factor = 1;
 	public static int factorm = 1;
 	public static boolean updating = false;
+	public static boolean downloading = false;
+	public static boolean creatingtables = false;
+	public static boolean test = false;
+	public static String filename="";
 	
 	@Override
 	public void paintComponent(Graphics g) {
@@ -47,10 +51,29 @@ public class MyRectanglePanel extends JPanel {
 		g.fillRect(width - space_right + 1, 0, width, height);
 
 		if (updating) {
-			g.setColor(Color.GREEN);
-			g.drawString("UPDATING PLEASE WAIT....", 100, 100);
+			//g.setColor(Color.GREEN);
+			g.drawString("UPDATING PLEASE WAIT", 100, 100);
 		}
 
+		if (downloading) {
+			//g.setColor(Color.GREEN);
+			g.drawString("UPDATING PLEASE WAIT", 100, 100);
+			g.drawString("Downloading new COT report....", 100, 120);
+		}
+		
+		if (creatingtables) {
+			//g.setColor(Color.GREEN);
+			g.drawString("UPDATING PLEASE WAIT", 100, 100);
+			g.drawString("Writing tables....", 100, 120);
+		}
+		
+		if (test) {
+			//g.setColor(Color.GREEN);
+			g.drawString("UPDATING PLEASE WAIT", 100, 100);
+			g.drawString("Writing tables....", 100, 120);
+			g.drawString("table "+filename, 100, 140);
+		}
+		
 		// crosshair
 		if ((COTVisualizer.drawcrosshair) && (drawgraph)) {
 
