@@ -13,9 +13,13 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.StringTokenizer;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
@@ -29,23 +33,35 @@ public class COTupdater {
 	private String folder = "";
 	private int last_year;
 	private String lastdate_string, currentdate_string;
-	private String[] futureslist;
 	private HashMap<String, String> hash = new HashMap<String, String>();
+    private String[] futureslist =  new String[] { "LEANHOGS", "FEEDERCATTLE", "LIVECATTLE", "LUMBER", "SUGARNo11", "COFFEE",
+			"ORANGEJUICE", "COTTON", "COCOA", "SOYBEANOIL", "SOYBEANMEAL", "SOYBEANS", "OATS", "RICE", "WHEAT",
+			"CORN", "ETHANOL", "NATURALGAS", "HEATINGOIL", "GASOLINE", "WTI", "COPPER", "PALLADIUM", "GOLD",
+			"SILVER", "PLATINUM", "S&P", "DJIA", "NASDAQ", "RUSSELL2000MINI", "NIKKEI", "USTREASURYBONDS",
+			"2YEARUSTREASURYNOTES", "5YEARUSTREASURYNOTES", "10YEARUSTREASURYNOTES", "30DAYFEDERALFUNDS",
+			"AUSTRALIANDOLLAR", "BRAZILIANREAL", "BRITISHPOUNDSTERLING", "EUROFX", "JAPANESEYEN", "CANADIANDOLLAR",
+			"MEXICANPESO", "NEWZEALANDDOLLAR", "RUSSIANRUBLE", "BITCOIN", "SWISSFRANC" };
 
-	/*
-	 * public COTupdater() { makefutureslist(); makehash(); }
-	 */
-
+	
 	public void init() {
-		makefutureslist();
 		makehash();
 	}
 
+	
+	
 	public void update() {
-		readhead();
-		downloadCOT();
-		write_future_files();
-		writehead();
+		//DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+		//Date date = new Date();
+		//System.out.println(dateFormat.format(date)); //2016/11/16 12:08:43
+		
+		//readhead(); 
+		//downloadCOT(); 		
+		if (checkupdate()) { 
+			writefuturefiles();
+		    writehead();
+		}
+		//Date date2 = new Date();
+		//System.out.println(dateFormat.format(date2)); //2016/11/16 12:08:43
 	}
 
 	private void writehead() {
@@ -61,7 +77,7 @@ public class COTupdater {
 		}
 	}
 
-	private void readhead() {
+	public void readhead() {
 		File file = new File("head");
 		if (file.exists()) {
 			try {
@@ -83,137 +99,89 @@ public class COTupdater {
 		}
 
 		if (!file.exists()) {
-			last_year = 1986;
+			last_year = 1986; 
 		}
 	}
 
-	private void write_future_files() {
+	
+	private boolean checkupdate() {
+		//check is there anything to update
 		File headfile = new File("head");
+		
+		InputStream fs;
+		try {
+			fs = new FileInputStream(list_of_files[0]);
+		    HSSFWorkbook wb;
+			wb = new HSSFWorkbook(fs);
+		    HSSFSheet sheet = wb.getSheetAt(0);
+  		    Row row = sheet.getRow(1);	
+		    Cell cell0 = row.getCell(0);
+		    String celltext0 = cell0.getStringCellValue();
+		    String line = "";
+		    
+		    
+		    // Date
+		    Cell cell2 = row.getCell(2);
+		    Date date = new Date();
+		    date = cell2.getDateCellValue();
 
-		File dir = new File("tables");
-		if (!dir.exists()) {
-			dir.mkdir();
+		    DateFormat df = new SimpleDateFormat("MM/yy");
+	        DateFormat df2 = new SimpleDateFormat("dd/MM/yy");
+		    String datestring = df.format(date);
+											
+		    boolean check = false;
+		    if (headfile.exists()) {
+			    Date lastdate = df2.parse(lastdate_string);
+			    if (date.compareTo(lastdate) <= 0) check = false;
+			    if (date.compareTo(lastdate) > 0) {
+				   check = true;
+			    }
+		    }
+	
+			if ((check) || (!headfile.exists())) {
+			    line += datestring;
+			    line += " "; 
+			    return true;
+		    }  
+		
+		    fs.close();
+		    wb.close();
 		}
-
-		folder = dir.getPath();
-
-		for (int k = 0; k < futureslist.length; k++) {
-			String name = futureslist[k];
-			String path = "";
-			// String pathold = "";
-
-			String OS = System.getProperty("os.name");
-			if (OS.startsWith("Windows"))
-				path = folder + "\\" + name;
-			if (!OS.startsWith("Windows"))
-				path = folder + "/" + name;
-			/*
-			 * if ((OS.startsWith("Windows")) && (!headfile.exists())) path = folder + "\\"
-			 * + name; if ((OS.startsWith("Windows")) && (headfile.exists())) { path =
-			 * folder + "\\" + name + "temp"; pathold = folder + "\\" + name; } if
-			 * ((!OS.startsWith("Windows")) && (!headfile.exists())) path = folder + "/" +
-			 * name; if ((!OS.startsWith("Windows")) && (headfile.exists())) { path = folder
-			 * + "/" + name + "temp"; pathold = folder + "/" + name; }
-			 */
-
-			File f = new File(path);
-			try {
-				FileWriter tablefw = new FileWriter(f, true);
-				for (int l = 0; l < list_of_files.length; l++) {
-					// for (int l = list_of_files.length - 1; l >= 0; l--) {
-					InputStream fs = new FileInputStream(list_of_files[l]);
-					HSSFWorkbook wb = new HSSFWorkbook(fs);
-					HSSFSheet sheet = wb.getSheetAt(0);
-
-					int r = sheet.getLastRowNum();
-					for (int j = r - 1; j >= 0; j--) {
-						Row row = sheet.getRow(j);
-						// for (Row row : sheet) {
-						Cell cell0 = row.getCell(0);
-						String celltext0 = cell0.getStringCellValue();
-						String line = "";
-
-						if (celltext0.contains(hash.get(name)))// (celltext0.equals(name))
-						{
-							// Datum
-							Cell cell2 = row.getCell(2);
-							Date date = new Date();
-							date = cell2.getDateCellValue();
-
-							DateFormat df = new SimpleDateFormat("MM/yy");
-						    DateFormat df2 = new SimpleDateFormat("dd/MM/yy");
-							String datestring = df.format(date);
-							
-							DateFormat formatemp = new SimpleDateFormat("dd/MM/yy");
-							String datestringtemp = formatemp.format(date);
-							
-							boolean check = false;
-							if (headfile.exists()) {
-								Date lastdate = df2.parse(lastdate_string);
-								if (date.compareTo(lastdate) <= 0)
-									check = false;
-								if (date.compareTo(lastdate) > 0) {
-									check = true;
-									System.out.println("datestring: "+datestringtemp+", lastdate_string: "+lastdate_string);
-								}
-							}
-				
-							if ((check) || (!headfile.exists())) {
-								line += datestring;
-								line += " ";
-
-								// Commercials
-								Cell cell11 = row.getCell(11);
-								Cell cell12 = row.getCell(12);
-								double result = cell11.getNumericCellValue() - cell12.getNumericCellValue();
-								int commercials = (int) result;
-								line += String.valueOf(commercials);
-								line += " ";
-
-								// Large Traders
-								Cell cell8 = row.getCell(8);
-								Cell cell9 = row.getCell(9);
-								double result2 = cell8.getNumericCellValue() - cell9.getNumericCellValue();
-								int largetraders = (int) result2;
-								line += String.valueOf(largetraders);
-								line += " ";
-
-								// Small Traders
-								Cell cell15 = row.getCell(15);
-								Cell cell16 = row.getCell(16);
-								double result3 = cell15.getNumericCellValue() - cell16.getNumericCellValue();
-								int smalltraders = (int) result3;
-								line += String.valueOf(smalltraders);
-
-								tablefw.write(line + "\n");
-
-								/*
-								 * if(headfile.exists()) { String strold; File old = new File(pathold);
-								 * BufferedReader br = new BufferedReader(new FileReader(pathold)); FileWriter
-								 * fw = new FileWriter(f, true); while ((strold = br.readLine()) != null) {
-								 * fw.write(strold + "\n"); }
-								 * 
-								 * br.close(); fw.close();
-								 * 
-								 * old.renameTo(f); }
-								 */
-							}
-						}
-					}
-
-					wb.close();
-					fs.close();
-				}
-
-				tablefw.close();
-				// if(headfile.exists()) f.delete();
-			}
-
-			catch (IOException | ParseException e) {
-				e.printStackTrace();
-			}
+		catch (IOException | ParseException e) {
+			e.printStackTrace();
 		}
-
+		return false;
+	}
+	
+	private void writefuturefiles() {
+		try {
+		    File headfile = new File("head");
+		    File dir = new File("tables");
+		    if (!dir.exists()) {
+			    dir.mkdir();
+		    }
+		
+		    folder = dir.getPath();
+		    
+		    Thread t1 = new Thread(new parseFiles(folder, futureslist, 0, 9, list_of_files, hash));
+		    t1.start();
+		    Thread t2 = new Thread(new parseFiles(folder, futureslist, 10, 19, list_of_files, hash));
+		    t2.start();
+		    Thread t3 = new Thread(new parseFiles(folder, futureslist, 20, 29, list_of_files, hash));
+		    t3.start();
+		    Thread t4 = new Thread(new parseFiles(folder, futureslist, 30, 39, list_of_files, hash));
+		    t4.start();
+		    Thread t5 = new Thread(new parseFiles(folder, futureslist, 40, 46, list_of_files, hash));
+		    t5.start();
+	
+			t1.join();
+			t2.join();
+			t3.join();
+			t4.join();
+			t5.join();
+		} 
+		catch (InterruptedException e1) {e1.printStackTrace();}
+		
 		// currentdate_string
 		InputStream is;
 		try {
@@ -228,14 +196,8 @@ public class COTupdater {
 			DateFormat df2 = new SimpleDateFormat("dd/MM/yy");
 			currentdate_string = df2.format(date);
 		}
-
-		catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
+		catch (IOException e) {e.printStackTrace();}
+				
 		// delete folder unzip/
 		File fileunzip = new File("unzip/");
 		File[] f = fileunzip.listFiles();
@@ -243,10 +205,10 @@ public class COTupdater {
 			s.delete();
 		}
 
-		fileunzip.delete();
+		fileunzip.delete();				
 	}
 
-	private void downloadCOT() {
+	public void downloadCOT() { 
 		int year = Calendar.getInstance().get(Calendar.YEAR);
 		File dir = new File("cot-excel");
 		dir.mkdir();
@@ -261,9 +223,7 @@ public class COTupdater {
 					fileOS.write(data, 0, byteContent);
 				}
 			}
-
-			catch (IOException e) {
-			}
+			catch (IOException e) { }
 		}
 
 		for (int i = last_year; i <= year; i++) {
@@ -303,7 +263,6 @@ public class COTupdater {
 				unzip(zipFilePath, destDir, prefix);
 			}
 		}
-
 		catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -395,16 +354,5 @@ public class COTupdater {
 		hash.put("RUSSIANRUBLE", "RUSSIAN RUBLE - CHICAGO MERCANTILE EXCHANGE");
 		hash.put("BITCOIN", "BITCOIN-USD - CBOE FUTURES EXCHANGE");
 		hash.put("SWISSFRANC", "SWISS FRANC - CHICAGO MERCANTILE EXCHANGE");
-	}
-
-	private void makefutureslist() {
-		futureslist = new String[] { "LEANHOGS", "FEEDERCATTLE", "LIVECATTLE", "LUMBER", "SUGARNo11", "COFFEE",
-				"ORANGEJUICE", "COTTON", "COCOA", "SOYBEANOIL", "SOYBEANMEAL", "SOYBEANS", "OATS", "RICE", "WHEAT",
-				"CORN", "ETHANOL", "NATURALGAS", "HEATINGOIL", "GASOLINE", "WTI", "COPPER", "PALLADIUM", "GOLD",
-				"SILVER", "PLATINUM", "S&P", "DJIA", "NASDAQ", "RUSSELL2000MINI", "NIKKEI", "USTREASURYBONDS",
-				"2YEARUSTREASURYNOTES", "5YEARUSTREASURYNOTES", "10YEARUSTREASURYNOTES", "30DAYFEDERALFUNDS",
-				"AUSTRALIANDOLLAR", "BRAZILIANREAL", "BRITISHPOUNDSTERLING", "EUROFX", "JAPANESEYEN", "CANADIANDOLLAR",
-				"MEXICANPESO", "NEWZEALANDDOLLAR", "RUSSIANRUBLE", "BITCOIN", "SWISSFRANC" };
-
 	}
 }
