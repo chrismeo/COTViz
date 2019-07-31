@@ -49,14 +49,6 @@ public class MyRectanglePanel extends JPanel {
 		if (updating) {
 			g.setColor(Color.GREEN);
 			g.drawString("UPDATING PLEASE WAIT....", 100, 100);
-	
-				/*g.drawString("UPDATING PLEASE WAIT....", 100, 100);
-				
-				g.drawString("UPDATING PLEASE WAIT.", 100, 100);
-				g.drawString("UPDATING PLEASE WAIT..", 100, 100);
-				g.drawString("UPDATING PLEASE WAIT...", 100, 100);*/
-			
-			
 		}
 
 		// crosshair
@@ -83,16 +75,6 @@ public class MyRectanglePanel extends JPanel {
 			/* String */ datum = COTVisualizer.dates[index_datum];// "11/11";
 
 			g.drawString(datum, COTVisualizer.crosshairx - 15, height - 5);
-
-			// g.drawString("Datum: ", COTVisualizer.crosshairx,
-			// COTVisualizer.crosshairy+10);
-			// g.drawString("Commercials: ", COTVisualizer.crosshairx,
-			// COTVisualizer.crosshairy+25);
-			// g.drawString("Large Traders: ", COTVisualizer.crosshairx,
-			// COTVisualizer.crosshairy+40);
-			// g.drawString("Small Traders: ", COTVisualizer.crosshairx,
-			// COTVisualizer.crosshairy+55);
-
 		}
 
 		// DRAW GRID
@@ -138,37 +120,37 @@ public class MyRectanglePanel extends JPanel {
 				if (start_x <= width - space_right) {
 					// DRAW COMMERCIALS
 					g.setColor(Color.RED);
-					g.drawLine(start_x - COTVisualizer.delta_x/* start_x-10+COTVisualizer.dx */,
+					g.drawLine(start_x - COTVisualizer.delta_x,
 							height / 2 - (factor * COTVisualizer.commercials[pos + 1]) / factorm
 									/ (1000 + 2 * COTVisualizer.dy),
-							start_x/* start_x+COTVisualizer.dx */,
+							start_x,
 							height / 2 - (factor * COTVisualizer.commercials[pos]) / factorm
 									/ (1000 + 2 * COTVisualizer.dy));
 					// DRAW LARGETRADERS
 					g.setColor(Color.BLUE);
-					g.drawLine(start_x - COTVisualizer.delta_x/* +COTVisualizer.dx */,
+					g.drawLine(start_x - COTVisualizer.delta_x,
 							height / 2 - (factor * COTVisualizer.largetraders[pos + 1]) / factorm
 									/ (1000 + 2 * COTVisualizer.dy),
-							start_x/* +COTVisualizer.dx */, height / 2 - (factor * COTVisualizer.largetraders[pos])
+							start_x, height / 2 - (factor * COTVisualizer.largetraders[pos])
 									/ factorm / (1000 + 2 * COTVisualizer.dy));
 					// DRAW SMALLTRADERS
 					g.setColor(Color.GREEN);
-					g.drawLine(start_x - 10/* +COTVisualizer.dx */,
+					g.drawLine(start_x - 10,
 							height / 2 - (factor * COTVisualizer.smalltraders[pos + 1]) / factorm
 									/ (1000 + 2 * COTVisualizer.dy),
-							start_x/* +COTVisualizer.dx */, height / 2 - (factor * COTVisualizer.smalltraders[pos])
+							start_x, height / 2 - (factor * COTVisualizer.smalltraders[pos])
 									/ factorm / (1000 + 2 * COTVisualizer.dy));
 
 					// DRAW X COORDINATES
 					g.setColor(Color.ORANGE);
 					g.setFont(font_small);
 					if (pos % 5 == 0) {
-						g.drawString(COTVisualizer.dates[pos], start_x - 15/* +COTVisualizer.dx */, height - 10);
-						g.drawLine(start_x/* +COTVisualizer.dx */, height, start_x/* +COTVisualizer.dx */, height - 10);
+						g.drawString(COTVisualizer.dates[pos], start_x - 15, height - 10);
+						g.drawLine(start_x, height, start_x, height - 10);
 					}
 				}
 				start_x -= COTVisualizer.delta_x;
-				// pos-=1;
+				
 				pos += 1;
 			}
 
