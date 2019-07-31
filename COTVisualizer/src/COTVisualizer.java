@@ -70,17 +70,6 @@ public class COTVisualizer {
 		myframe = new JFrame("COTViz");
 		myframe.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-		/*
-		 * try { BufferedImage imageholly = null; String OS =
-		 * System.getProperty("os.name"); if (OS.startsWith("Windows")) imageholly =
-		 * ImageIO.read(COTVisualizer.class.getResource("/resources/holly.PNG")); else
-		 * imageholly =
-		 * ImageIO.read(COTVisualizer.class.getResource("/resources/holly.png"));
-		 * myframe.setIconImage(imageholly); }
-		 * 
-		 * catch (IOException e) { e.printStackTrace(); }
-		 */
-
 		// repaint after resize
 		myframe.addComponentListener(new ComponentAdapter() {
 			@Override
@@ -93,8 +82,6 @@ public class COTVisualizer {
 			}
 		});
 
-		// readfiles();
-
 		addComponentsToPane(myframe.getContentPane());
 
 		myframe.setJMenuBar(tb);
@@ -102,21 +89,6 @@ public class COTVisualizer {
 		myframe.setVisible(true);
 		myframe.repaint();
 	}
-
-	/*
-	 * public static void readfiles() { String str; List<String> list = new
-	 * ArrayList<String>();
-	 * 
-	 * try { BufferedReader in = new BufferedReader(new FileReader("futures")); File
-	 * fut = new File("futures"); if (fut.exists()) while ((str = in.readLine()) !=
-	 * null) { list.add(str); }
-	 * 
-	 * in.close(); }
-	 * 
-	 * catch (IOException e) { e.printStackTrace(); }
-	 * 
-	 * comboBoxList = list.toArray(new String[list.size()]); }
-	 */
 
 	public static void addComponentsToPane(Container pane) {
 		tb = new JMenuBar();
@@ -150,13 +122,13 @@ public class COTVisualizer {
 							smalltraders_list.add(Integer.valueOf(tokens[3]));
 						}
 
-						Collections.reverse(dates_list); //
+						Collections.reverse(dates_list); 
 						dates = dates_list.toArray(new String[dates_list.size()]);
-						Collections.reverse(commercials_list); //
+						Collections.reverse(commercials_list); 
 						commercials = commercials_list.toArray(new Integer[commercials_list.size()]);
-						Collections.reverse(largetraders_list);//
+						Collections.reverse(largetraders_list);
 						largetraders = largetraders_list.toArray(new Integer[largetraders_list.size()]);
-						Collections.reverse(smalltraders_list); //
+						Collections.reverse(smalltraders_list); 
 						smalltraders = smalltraders_list.toArray(new Integer[smalltraders_list.size()]);
 						oszillator26 = new Integer[dates.length - 26];
 
@@ -194,29 +166,6 @@ public class COTVisualizer {
 				catch (IOException e) {
 					e.printStackTrace();
 				}
-
-				/*
-				 * dates = dates_list.toArray(new String[dates_list.size()]); commercials =
-				 * commercials_list.toArray(new Integer[commercials_list.size()]); largetraders
-				 * = largetraders_list.toArray(new Integer[largetraders_list.size()]);
-				 * smalltraders = smalltraders_list.toArray(new
-				 * Integer[smalltraders_list.size()]); oszillator26 = new Integer[dates.length -
-				 * 26];
-				 * 
-				 * List<Integer> oszillator26_list = new ArrayList<Integer>(); int t = 0; while
-				 * (t < oszillator26.length) { oszillator26_list = commercials_list.subList(t,
-				 * 26 + t); int min26 = t +
-				 * oszillator26_list.indexOf(Collections.min(oszillator26_list)); int max26 = t
-				 * + oszillator26_list.indexOf(Collections.max(oszillator26_list));
-				 * 
-				 * int d = commercials[t]; int f = commercials[max26]; int g =
-				 * commercials[min26]; int o = 0; if ((f - g) != 0) o = 100 * (d - g) / (f - g);
-				 * 
-				 * oszillator26[t] = o; t++; }
-				 * 
-				 * dx = 0; dy = 0; MyOszillator.drawoszillator = true;
-				 * MyRectanglePanel.drawgraph = true; myframe.repaint();
-				 */
 			}
 		});
 
@@ -296,8 +245,7 @@ public class COTVisualizer {
 				          } 
 				       }); 
 				   }
-				}).start();
-				 
+				}).start(); 
 			}
 		});
 

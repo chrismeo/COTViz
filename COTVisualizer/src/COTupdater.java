@@ -31,7 +31,6 @@ public class COTupdater {
 	private String folder = "";
 	private int last_year;
 	private String lastdate_string, currentdate_string;
-	//private String[] futureslist;
 	private HashMap<String, String> hash = new HashMap<String, String>();
     private String[] futureslist =  new String[] { "LEANHOGS", "FEEDERCATTLE", "LIVECATTLE", "LUMBER", "SUGARNo11", "COFFEE",
 			"ORANGEJUICE", "COTTON", "COCOA", "SOYBEANOIL", "SOYBEANMEAL", "SOYBEANS", "OATS", "RICE", "WHEAT",
@@ -42,25 +41,20 @@ public class COTupdater {
 			"MEXICANPESO", "NEWZEALANDDOLLAR", "RUSSIANRUBLE", "BITCOIN", "SWISSFRANC" };
 
 	
-
 	public void init() {
 		makehash();
 	}
 
 	public void update() {
-		DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-		Date date = new Date();
-		System.out.println(dateFormat.format(date)); //2016/11/16 12:08:43
+		//DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+		//Date date = new Date();
+		//System.out.println(dateFormat.format(date)); //2016/11/16 12:08:43
 		readhead(); 
-		System.out.println("start downloading");
-		downloadCOT(); 
-		System.out.println("finished downloading");
-		
+		downloadCOT(); 		
 		if (checkupdate()) writefuturefiles();
-		//write_future_files();
 		writehead();
-		Date date2 = new Date();
-		System.out.println(dateFormat.format(date2)); //2016/11/16 12:08:43
+		//Date date2 = new Date();
+		//System.out.println(dateFormat.format(date2)); //2016/11/16 12:08:43
 	}
 
 	private void writehead() {
@@ -154,8 +148,6 @@ public class COTupdater {
 	
 	private void writefuturefiles() {
 		try {
-		    //ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(5);
-		
 		    File headfile = new File("head");
 		    File dir = new File("tables");
 		    if (!dir.exists()) {
@@ -174,33 +166,14 @@ public class COTupdater {
 		    t4.start();
 		    Thread t5 = new Thread(new parseFiles(folder, futureslist, 40, 46, list_of_files, hash));
 		    t5.start();
-		
-		/*
-		parseFiles task1 = new parseFiles(folder, futureslist, 0, 9, list_of_files, hash);
-		executor.execute(task1);	
-		
-		parseFiles task2 = new parseFiles(folder, futureslist, 10, 19, list_of_files, hash);
-		executor.execute(task2);	
-		
-		parseFiles task3 = new parseFiles(folder, futureslist, 20, 29, list_of_files, hash);
-		executor.execute(task3);	
-		
-		parseFiles task4 = new parseFiles(folder, futureslist, 30, 39, list_of_files, hash);
-		executor.execute(task4);	
-		
-		parseFiles task5 = new parseFiles(folder, futureslist, 40, 46, list_of_files, hash);
-		executor.execute(task5);	
-	*/
-		
 	
 			t1.join();
 			t2.join();
 			t3.join();
 			t4.join();
 			t5.join();
-		} catch (InterruptedException e1) {e1.printStackTrace();}
-		
-		
+		} 
+		catch (InterruptedException e1) {e1.printStackTrace();}
 		
 		// currentdate_string
 		InputStream is;
@@ -216,7 +189,6 @@ public class COTupdater {
 			DateFormat df2 = new SimpleDateFormat("dd/MM/yy");
 			currentdate_string = df2.format(date);
 		}
-
 		catch (IOException e) {e.printStackTrace();}
 				
 		
@@ -229,138 +201,6 @@ public class COTupdater {
 
 		fileunzip.delete();
 				
-	}
-	
-	private void write_future_files() throws FileNotFoundException {
-		File headfile = new File("head");
-
-		File dir = new File("tables");
-		if (!dir.exists()) {
-			dir.mkdir();
-		}
-
-		folder = dir.getPath();
-
-		for (int k = 0; k < futureslist.length; k++) {
-			String name = futureslist[k];
-			String path = "";
-
-			String OS = System.getProperty("os.name");
-			if (OS.startsWith("Windows"))
-				path = folder + "\\" + name;
-			if (!OS.startsWith("Windows"))
-				path = folder + "/" + name;
-			
-
-			File f = new File(path);
-			try {
-				FileWriter tablefw = new FileWriter(f, true);
-				for (int l = 0; l < list_of_files.length; l++) {
-					InputStream fs = new FileInputStream(list_of_files[l]);
-					HSSFWorkbook wb = new HSSFWorkbook(fs);
-					HSSFSheet sheet = wb.getSheetAt(0);
-
-					int r = sheet.getLastRowNum();
-					for (int j = r - 1; j >= 0; j--) {
-						Row row = sheet.getRow(j);
-						
-						Cell cell0 = row.getCell(0);
-						String celltext0 = cell0.getStringCellValue();
-						String line = "";
-
-						if (celltext0.contains(hash.get(name)))
-						{
-							// Date
-							Cell cell2 = row.getCell(2);
-							Date date = new Date();
-							date = cell2.getDateCellValue();
-
-							DateFormat df = new SimpleDateFormat("MM/yy");
-						    DateFormat df2 = new SimpleDateFormat("dd/MM/yy");
-							String datestring = df.format(date);
-														
-							boolean check = false;
-							if (headfile.exists()) {
-								Date lastdate = df2.parse(lastdate_string);
-								if (date.compareTo(lastdate) <= 0)
-									check = false;
-								if (date.compareTo(lastdate) > 0) {
-									check = true;
-								}
-							}
-				
-							if ((check) || (!headfile.exists())) {
-								line += datestring;
-								line += " ";
-
-								// Commercials
-								Cell cell11 = row.getCell(11);
-								Cell cell12 = row.getCell(12);
-								double result = cell11.getNumericCellValue() - cell12.getNumericCellValue();
-								int commercials = (int) result;
-								line += String.valueOf(commercials);
-								line += " ";
-
-								// Large Traders
-								Cell cell8 = row.getCell(8);
-								Cell cell9 = row.getCell(9);
-								double result2 = cell8.getNumericCellValue() - cell9.getNumericCellValue();
-								int largetraders = (int) result2;
-								line += String.valueOf(largetraders);
-								line += " ";
-
-								// Small Traders
-								Cell cell15 = row.getCell(15);
-								Cell cell16 = row.getCell(16);
-								double result3 = cell15.getNumericCellValue() - cell16.getNumericCellValue();
-								int smalltraders = (int) result3;
-								line += String.valueOf(smalltraders);
-
-								tablefw.write(line + "\n");
-							}
-						}
-					}
-
-					wb.close();
-					fs.close();
-				}
-
-				tablefw.close();
-			}
-
-			catch (IOException | ParseException e) {
-				e.printStackTrace();
-			}
-		}
-
-		// currentdate_string
-		InputStream is;
-		try {
-			int l = list_of_files.length;
-			is = new FileInputStream(list_of_files[l - 1]);
-			HSSFWorkbook hssfwb = new HSSFWorkbook(is);
-			HSSFSheet sheet = hssfwb.getSheetAt(0);
-			Row row = sheet.getRow(1);
-			Cell cell2 = row.getCell(2);
-			Date date = new Date();
-			date = cell2.getDateCellValue();
-			DateFormat df2 = new SimpleDateFormat("dd/MM/yy");
-			currentdate_string = df2.format(date);
-		}
-
-		catch (IOException e) {
-			e.printStackTrace();
-		}
-		//catch (IOException e) {e.printStackTrace();}
-
-		// delete folder unzip/
-		File fileunzip = new File("unzip/");
-		File[] f = fileunzip.listFiles();
-		for (File s : f) {
-			s.delete();
-		}
-
-		fileunzip.delete();
 	}
 
 	private void downloadCOT() { 
@@ -378,9 +218,7 @@ public class COTupdater {
 					fileOS.write(data, 0, byteContent);
 				}
 			}
-
-			catch (IOException e) {
-			}
+			catch (IOException e) { }
 		}
 
 		for (int i = last_year; i <= year; i++) {
@@ -420,7 +258,6 @@ public class COTupdater {
 				unzip(zipFilePath, destDir, prefix);
 			}
 		}
-
 		catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -513,19 +350,4 @@ public class COTupdater {
 		hash.put("BITCOIN", "BITCOIN-USD - CBOE FUTURES EXCHANGE");
 		hash.put("SWISSFRANC", "SWISS FRANC - CHICAGO MERCANTILE EXCHANGE");
 	}
-
-	/*
-	 * private void makefutureslist() { futureslist = new String[] { "LEANHOGS",
-	 * "FEEDERCATTLE", "LIVECATTLE", "LUMBER", "SUGARNo11", "COFFEE", "ORANGEJUICE",
-	 * "COTTON", "COCOA", "SOYBEANOIL", "SOYBEANMEAL", "SOYBEANS", "OATS", "RICE",
-	 * "WHEAT", "CORN", "ETHANOL", "NATURALGAS", "HEATINGOIL", "GASOLINE", "WTI",
-	 * "COPPER", "PALLADIUM", "GOLD", "SILVER", "PLATINUM", "S&P", "DJIA", "NASDAQ",
-	 * "RUSSELL2000MINI", "NIKKEI", "USTREASURYBONDS", "2YEARUSTREASURYNOTES",
-	 * "5YEARUSTREASURYNOTES", "10YEARUSTREASURYNOTES", "30DAYFEDERALFUNDS",
-	 * "AUSTRALIANDOLLAR", "BRAZILIANREAL", "BRITISHPOUNDSTERLING", "EUROFX",
-	 * "JAPANESEYEN", "CANADIANDOLLAR", "MEXICANPESO", "NEWZEALANDDOLLAR",
-	 * "RUSSIANRUBLE", "BITCOIN", "SWISSFRANC" };
-	 * 
-	 * }
-	 */
 }
