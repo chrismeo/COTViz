@@ -63,8 +63,8 @@ public class COTVisualizer {
 	public static JButton update;
 	public static COTupdater up;
 	
-	
-	public static void main(String[] args) { //TEST
+	//TEST2
+	public static void main(String[] args) { 
 		up = new COTupdater();
 		up.init();
 		myframe = new JFrame("COTViz");
@@ -251,7 +251,6 @@ public class COTVisualizer {
 				       SwingUtilities.invokeLater(new Runnable() {
 				          @Override public void run() { 
 				        	  MyRectanglePanel.updating = false;
-				        	  //MyRectanglePanel.downloading = false; //
 				        	  MyRectanglePanel.creatingtables = false;
 				        	  MyRectanglePanel.test = false;
 				              myframe.repaint();
