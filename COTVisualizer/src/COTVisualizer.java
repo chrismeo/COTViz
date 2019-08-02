@@ -63,7 +63,7 @@ public class COTVisualizer {
 	public static JButton update;
 	public static COTupdater up;
 	
-	//TEST2
+	//Master
 	public static void main(String[] args) { 
 		up = new COTupdater();
 		up.init();
