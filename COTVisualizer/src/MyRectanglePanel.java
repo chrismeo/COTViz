@@ -6,9 +6,10 @@ import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.Console;
 import java.io.IOException;
-
 import javax.imageio.ImageIO;
 import javax.swing.JPanel;
+
+
 
 public class MyRectanglePanel extends JPanel {
 	public static int space_right = 80;
@@ -16,8 +17,8 @@ public class MyRectanglePanel extends JPanel {
 	public static int width, height;
 	public static String datum = "";
 	static boolean drawgraph = false;
-	public static int factor = 1;
-	public static int factorm = 1;
+	//public static int factor = 1;
+	//public static int factorm = 1;
 	public static boolean updating = false;
 	public static boolean downloading = false;
 	public static boolean creatingtables = false;
@@ -27,7 +28,8 @@ public class MyRectanglePanel extends JPanel {
 	@Override
 	public void paintComponent(Graphics g) {
 		super.paintComponent(g);
-
+       
+		
 		height = getHeight();
 		width = getWidth();
 		g.setColor(Color.RED);
@@ -95,7 +97,7 @@ public class MyRectanglePanel extends JPanel {
 
 			int index_datum = (width - COTVisualizer.crosshairx - space_right) / 10;
 
-			/* String */ datum = COTVisualizer.dates[index_datum];// "11/11";
+			datum = COTVisualizer.dates[index_datum];
 
 			g.drawString(datum, COTVisualizer.crosshairx - 15, height - 5);
 		}
@@ -122,6 +124,10 @@ public class MyRectanglePanel extends JPanel {
 		}
 
 		if (drawgraph) {
+			g.setColor(Color.GRAY);
+			g.drawLine(0, height/2, width-75, height/2);
+			//g.setColor(Color.RED);
+			//g.drawString("0", height/2,width- 70);
 			g.setFont(font_small);
 			g.setColor(Color.RED);
 			g.drawString(String.valueOf(COTVisualizer.commercials[0]), 100, 10);
@@ -129,6 +135,7 @@ public class MyRectanglePanel extends JPanel {
 			g.drawString(String.valueOf(COTVisualizer.largetraders[0]), 100, 30);
 			g.setColor(Color.GREEN);
 			g.drawString(String.valueOf(COTVisualizer.smalltraders[0]), 100, 50);
+			/*
 			if (COTVisualizer.plusevent)
 				factor = 10;
 			if (COTVisualizer.minusevent)
@@ -137,11 +144,13 @@ public class MyRectanglePanel extends JPanel {
 				factor = 1;
 			if (!COTVisualizer.minusevent)
 				factorm = 1;
+				*/
 			int start_x = width - space_right - 1 + COTVisualizer.dx;
 			int pos = 0;
 			while ((start_x > COTVisualizer.delta_x) && (pos < COTVisualizer.commercials.length - 1)) {
 				if (start_x <= width - space_right) {
 					// DRAW COMMERCIALS
+					/*
 					g.setColor(Color.RED);
 					g.drawLine(start_x - COTVisualizer.delta_x,
 							height / 2 - (factor * COTVisualizer.commercials[pos + 1]) / factorm
@@ -149,25 +158,50 @@ public class MyRectanglePanel extends JPanel {
 							start_x,
 							height / 2 - (factor * COTVisualizer.commercials[pos]) / factorm
 									/ (1000 + 2 * COTVisualizer.dy));
+					 * */
+					
+					g.setColor(Color.RED);
+					g.drawLine(start_x - COTVisualizer.delta_x,
+							height/2 - ((height-20)/2)* COTVisualizer.commercials[pos+1]/COTVisualizer.Max,
+							start_x,
+							height/2 - ((height-20)/2)* COTVisualizer.commercials[pos]/COTVisualizer.Max);
+			
+					
 					// DRAW LARGETRADERS
 					g.setColor(Color.BLUE);
+					/*
 					g.drawLine(start_x - COTVisualizer.delta_x,
 							height / 2 - (factor * COTVisualizer.largetraders[pos + 1]) / factorm
 									/ (1000 + 2 * COTVisualizer.dy),
 							start_x, height / 2 - (factor * COTVisualizer.largetraders[pos])
 									/ factorm / (1000 + 2 * COTVisualizer.dy));
+					*/
+					
+					g.drawLine(start_x - COTVisualizer.delta_x,
+							height/2 - ((height-20)/2)* COTVisualizer.largetraders[pos+1]/COTVisualizer.Max,
+							start_x,
+							height/2 - ((height-20)/2)* COTVisualizer.largetraders[pos]/COTVisualizer.Max);
+					
+					
 					// DRAW SMALLTRADERS
 					g.setColor(Color.GREEN);
+					/*
 					g.drawLine(start_x - 10,
 							height / 2 - (factor * COTVisualizer.smalltraders[pos + 1]) / factorm
 									/ (1000 + 2 * COTVisualizer.dy),
 							start_x, height / 2 - (factor * COTVisualizer.smalltraders[pos])
 									/ factorm / (1000 + 2 * COTVisualizer.dy));
-
+                    */
+					g.drawLine(start_x - COTVisualizer.delta_x,
+							height/2 - ((height-20)/2)* COTVisualizer.smalltraders[pos+1]/COTVisualizer.Max,
+							start_x,
+							height/2 - ((height-20)/2)* COTVisualizer.smalltraders[pos]/COTVisualizer.Max);
+					
+					
 					// DRAW X COORDINATES
 					g.setColor(Color.ORANGE);
 					g.setFont(font_small);
-					if (pos % 5 == 0) {
+					if (pos % 10 == 0) {
 						g.drawString(COTVisualizer.dates[pos], start_x - 15, height - 10);
 						g.drawLine(start_x, height, start_x, height - 10);
 					}
@@ -178,6 +212,23 @@ public class MyRectanglePanel extends JPanel {
 			}
 
 			// DRAW Y COORDINATES
+			g.setColor(Color.BLUE);
+			g.drawString(Integer.toString(COTVisualizer.largetraders[0]), 
+					width + 10 - space_right, 
+					height/2 - ((height-20)/2)* COTVisualizer.largetraders[0]/COTVisualizer.Max);
+			g.setColor(Color.RED);
+			g.drawString(Integer.toString(COTVisualizer.commercials[0]), 
+					width + 10 - space_right, 
+					height/2 - ((height-20)/2)* COTVisualizer.commercials[0]/COTVisualizer.Max);
+			g.setColor(Color.GREEN);
+			g.drawString(Integer.toString(COTVisualizer.smalltraders[0]), 
+					width + 10 - space_right, 
+					height/2 - ((height-20)/2)* COTVisualizer.smalltraders[0]/COTVisualizer.Max);
+			g.drawString("0", width + 10 - space_right, height / 2 + 5);
+			g.setColor(Color.GRAY);
+			g.drawString("0", width + 10 - space_right, height / 2 + 5);
+			
+			/*
 			g.setColor(Color.MAGENTA);
 			int y1 = (factor * 20 * 1000 / (1000 + 2 * COTVisualizer.dy)) / factorm;
 
@@ -193,7 +244,7 @@ public class MyRectanglePanel extends JPanel {
 				y1 += (factor * 20 * 1000 / (1000 + 2 * COTVisualizer.dy)) / factorm;
 
 			}
-
+*/
 			drawgraph = false;
 		}
 	}

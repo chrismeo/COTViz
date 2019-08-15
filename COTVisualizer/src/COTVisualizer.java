@@ -18,6 +18,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import javax.imageio.ImageIO;
@@ -52,20 +53,21 @@ public class COTVisualizer {
 	public static int crosshairx, crosshairy;
 	public static boolean drawcrosshair = false;
 	public static boolean grid = false;
-	public static JCheckBox grid_box, crosshair_box, plus, minus;
+	public static JCheckBox grid_box, crosshair_box;// plus, minus;
 	public static int drag_x;
 	public static Point mousePT;
 	public static int dx = 0;
 	public static int dy = 0;
-	public static int delta_x = 10;
-	public static boolean plusevent = false;
-	public static boolean minusevent = false;
+	public static int delta_x = 5;
+	//public static boolean plusevent = false;
+	//public static boolean minusevent = false;
 	public static JButton update;
 	public static COTupdater up;
+	public static int Max;
 	
 	//Master
 	public static void main(String[] args) { 
-		up = new COTupdater();
+		up = new COTupdater(); 
 		up.init();
 		myframe = new JFrame("COTViz");
 		myframe.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -130,8 +132,19 @@ public class COTVisualizer {
 						largetraders = largetraders_list.toArray(new Integer[largetraders_list.size()]);
 						Collections.reverse(smalltraders_list); 
 						smalltraders = smalltraders_list.toArray(new Integer[smalltraders_list.size()]);
+						
+						//Max value of commercials
+						Max = Math.abs(commercials[0]);
+						for (int i = 1; i < commercials.length; i++ ) {
+						    if(Math.abs(commercials[i]) > Max)  Max = Math.abs(commercials[i]);
+						}
+						
+						for (int i = 1; i < largetraders.length; i++ ) {
+							 if(Math.abs(largetraders[i]) > Max) Max = Math.abs(largetraders[i]);
+						}
+						
 						oszillator26 = new Integer[dates.length - 26];
-
+						
 						List<Integer> oszillator26_list = new ArrayList<Integer>();
 						int t = 0;
 						while (t < oszillator26.length) {
@@ -197,7 +210,7 @@ public class COTVisualizer {
 				myframe.repaint();
 			}
 		});
-
+/*
 		minus = new JCheckBox();
 		minus.setText("-");
 
@@ -210,7 +223,8 @@ public class COTVisualizer {
 				myframe.repaint();
 			}
 		});
-
+*/
+		/*
 		plus = new JCheckBox();
 		plus.setText("+");
 
@@ -223,7 +237,7 @@ public class COTVisualizer {
 				myframe.repaint();
 			}
 		});
-
+*/
 		update = new JButton("update COT");
 		update.addActionListener(new ActionListener() {
 			@Override
@@ -266,8 +280,8 @@ public class COTVisualizer {
 		JLabel dummy = new JLabel("                                                                         ");
 		tb.add(grid_box);
 		tb.add(crosshair_box);
-		tb.add(plus);
-		tb.add(minus);
+		//tb.add(plus);
+		//tb.add(minus);
 		tb.add(update);
 		tb.add(dummy);
 		oszillator = new MyOszillator();
@@ -311,6 +325,7 @@ public class COTVisualizer {
 
 			@Override
 			public void mouseMoved(MouseEvent arg0) {
+				/*
 				if ((arg0.getX() > MyRectanglePanel.width - MyRectanglePanel.space_right)
 						&& (arg0.getY() < MyRectanglePanel.height - MyRectanglePanel.space_buttom)) {
 					Cursor cursor = new Cursor(Cursor.S_RESIZE_CURSOR);
@@ -328,7 +343,7 @@ public class COTVisualizer {
 					Cursor cursor = new Cursor(Cursor.DEFAULT_CURSOR);
 					myframe.setCursor(cursor);
 				}
-
+                */
 				crosshairx = arg0.getX();
 				crosshairy = arg0.getY();
 
